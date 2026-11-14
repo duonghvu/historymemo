@@ -43,7 +43,7 @@ const UI_LANGS = ['en', 'vi', 'ja'];
 const MAX_SECONDS = 180;
 const PER_DAY = [1, 2, 3, 5];
 const DEFAULT_HOURS = { 1: [8], 2: [8, 19], 3: [8, 13, 19], 5: [8, 10, 13, 16, 19] };
-const LIFE_TOTAL = THEMES.length * 7;         // 56
+// LIFE_TOTAL (56) lives in Questions.gs: Apps Script loads Code.gs first, so nothing here may use THEMES at load time.
 const TIMELINE_STAGES = ['early', 'child', 'youth', 'young', 'middle', 'later', 'now'];
 const STAGE_HINT = {
   early: 'birth and the very first memories (about age 0–6)',

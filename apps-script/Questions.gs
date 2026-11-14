@@ -84,6 +84,8 @@ const THEMES = [
  * Life stages: the biography book is ordered from family roots → birth → … → today → messages.
  * Each life question has a default stage (the storyteller can change it after recording).
  */
+const LIFE_TOTAL = THEMES.length * 7;         // 56 life questions
+
 const STAGES = ['roots', 'early', 'child', 'youth', 'young', 'middle', 'later', 'now', 'legacy'];
 const STAGE_NAME = {
   roots:  { en: 'Family roots',              vi: 'Cội nguồn',                  ja: 'ルーツ' },

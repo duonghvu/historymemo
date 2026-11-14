@@ -22,6 +22,13 @@ function record(key, extra = {}) {
   return call('storyDone', { key, fileId: fid, kind: 'audio', seconds: 42, ...extra });
 }
 
+test('Apps Script load order: Code.gs runs first, so it must not use Questions.gs names at load time', async () => {
+  const vm = await import('node:vm');
+  const ctx = vm.createContext({});
+  for (const f of ['Code.gs', 'Questions.gs']) vm.runInContext(fs.readFileSync(path.join(ROOT, 'apps-script', f), 'utf8'), ctx);
+  assert.equal(vm.runInContext('LIFE_TOTAL', ctx), 56);
+});
+
 test('rejects wrong secret and wrong storyteller key', () => {
   assert.equal(JSON.parse(g.ctx.doPost({ postData: { contents: '{"secret":"x","action":"storytellers"}' } }).getContent()).error, 'unauthorized');
   assert.equal(call('me', { key: 'nope' }).error, 'unauthorized');
