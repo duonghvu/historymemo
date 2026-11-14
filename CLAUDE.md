@@ -24,11 +24,13 @@ Stories are stored in Google Drive organised by user. Users are seniors: big typ
 
 ## Architecture
 - `public/` (static, ES modules, no framework/build)
-  - `app.js`: storyteller app. Screens are rendered by functions (`welcome`, `pickUi`, `install`, `pickLangs`,
-    `pickMode`, `pickPerDay`, `pickKind`, `notify`, `home`, `record`, `stop`, `send`); clicks route via `data-a` → `actions`.
-    Setup order is decided in `next()`. Settings re-runs the same steps (`startSetup(true)`).
+  - `app.js`: storyteller app, kept deliberately minimal for seniors. Flow: `pickUi` (one tap: language; skipped if the
+    admin already set it) → `home` (question, Listen, big Record, small "voice only" / "skip") → `record` (camera opens
+    = permission prompt, then 3-2-1 countdown, then `Recorder.begin()`) → `stop` (review: Send / Retake) → `send` →
+    `thanks` (offers 🔔 reminders once). Pace, language rotation and video/voice are set on the admin page, not here.
+    Camera problems go to `mediaHelp` (in-app browser / denied / busy / no camera). Clicks route via `data-a` → `actions`.
   - `i18n.js`: UI strings `STR.en|vi|ja`, `t(lang, key, vars)`. Teochew has no written UI.
-  - `common.js`: `api()`, `Recorder` (MediaRecorder; iOS → mp4), `uploadToDrive()` (Drive v3 resumable; `ticket.uploadUrl` overrides for mock).
+  - `common.js`: `api()`, `Recorder` (`open()` = getUserMedia + preview, `begin()` = MediaRecorder; iOS → mp4), `uploadToDrive()` (Drive v3 resumable; `ticket.uploadUrl` overrides for mock).
   - `admin.html/js`: storytellers CRUD, private link + QR, test push, record question voices per language.
   - `sw.js`: push notifications.
 - `api/` (Vercel functions; `_lib.js` not routed)

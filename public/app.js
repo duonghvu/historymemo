@@ -18,7 +18,6 @@ const S = {
   kind: 'video', stage: null, rec: null, blob: null, timer: null,
   draft: null, settingsMode: false, retry: null, rest: false, waiting: 0,
 };
-const STAGE_CHIPS = ['roots', 'child', 'youth', 'young', 'middle', 'later', 'now'];
 const take = out => {
   S.profile = out.profile || S.profile; S.next = out.next; S.doneToday = out.doneToday || 0;
   if (out.rest !== undefined) S.rest = out.rest;
@@ -72,19 +71,11 @@ async function boot() {
   next();
 }
 
-/** Decide which screen comes next during first-time setup. */
+/** Only one setup step: the language. Pace, rotation and video/voice come from the family's admin page. */
 function next() {
   const p = S.profile;
-  if (!p.uiLang) return pickUi();
-  if (isIOS && !standalone && !flag('skipInstall')) return install();
-  if (!p.langs || !p.langs.length) return startSetup();
-  if (needsNotify()) return notify();
+  if (!p.uiLang || !p.langs || !p.langs.length) return pickUi();
   home();
-}
-
-function needsNotify() {
-  return standalone && 'Notification' in window && 'PushManager' in window &&
-         Notification.permission === 'default' && !flag('skipNotify');
 }
 
 function phoneTz() { try { return Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch { return ''; } }
@@ -148,124 +139,45 @@ function signedIn(out) {
   boot();
 }
 
-// ─────────────────────────── setup steps ───────────────────────────
+// ─────────────────────────── language: the only setup step ───────────────────────────
+
+const LANG_ORDER = ['vi', 'teo', 'en', 'ja'];
 
 function pickUi() {
   render(`
-    <h1 class="tri">Choose your language<br>Chọn ngôn ngữ<br>言語を選んでください</h1>
-    <div class="options">${['en', 'vi', 'ja'].map(l =>
-      `<button class="option big-text" data-a="setUi" data-v="${l}">${LANG_NATIVE[l]}</button>`).join('')}</div>`, 'pickUi');
+    <h1 class="tri">Chọn ngôn ngữ<br>Choose your language<br>言語を選んでください</h1>
+    <div class="options">${LANG_ORDER.map(l =>
+      `<button class="option big-text" data-a="setLang" data-v="${l}">${LANG_NATIVE[l]}</button>`).join('')}</div>`, 'pickUi');
 }
 
-async function setUi(lang) {
-  S.profile.uiLang = lang;
-  if (S.settingsMode) { S.draft.uiLang = lang; return pickLangs(); }
-  try {
-    const out = await api('saveProfile', { profile: { uiLang: lang, tz: Intl.DateTimeFormat().resolvedOptions().timeZone } }, k);
-    take(out);
-  } catch (err) { return fail(err, () => setUi(lang)); }
-  next();
-}
-
-function install() {
-  render(`
-    <h1>${tr('installTitle')}</h1>
-    <p class="lead">${tr('installLead')}</p>
-    <ol class="steps">${tr('install').map(s => `<li>${s}</li>`).join('')}</ol>
-    <button class="ghost" data-a="skipInstall">${tr('later2')}</button>`, 'install');
-}
-
-function startSetup(settings = false) {
-  const p = S.profile;
-  S.settingsMode = settings;
-  S.draft = { uiLang: p.uiLang, langs: (p.langs || []).slice(), mode: p.mode || 'daily',
-              perDay: p.perDay || 1, defaultKind: p.defaultKind || 'video' };
-  if (settings) return pickUi();
-  if (!S.draft.langs.length) S.draft.langs = [p.uiLang];
-  pickLangs();
-}
-
-function pickLangs() {
-  const d = S.draft;
-  render(`
-    <h1>${tr('langsTitle')}</h1>
-    <p class="hint">${tr('langsHint')}</p>
-    <div class="options">${['vi', 'teo', 'en', 'ja'].map(l => `
-      <button class="option check ${d.langs.includes(l) ? 'on' : ''}" data-a="toggleLang" data-v="${l}" aria-pressed="${d.langs.includes(l)}">
-        <span class="box"></span><span><b>${LANG_NATIVE[l]}</b>${l !== L() && l !== 'teo' ? `<small>${langName(l)}</small>` : ''}</span>
-      </button>`).join('')}</div>
-    <button class="primary" data-a="langsNext" ${d.langs.length ? '' : 'disabled'}>${tr('next')} →</button>`, 'langs');
-}
-
-function pickMode() {
-  const [a, b] = S.draft.langs.map(langName);
-  render(`
-    <h1>${tr('modeTitle')}</h1>
-    <div class="options">
-      ${['daily', 'each'].map(m => `
-        <button class="option ${S.draft.mode === m ? 'on' : ''}" data-a="setMode" data-v="${m}">
-          <b>${tr(m === 'daily' ? 'modeDaily' : 'modeEach')}</b>
-          <small>${tr(m === 'daily' ? 'modeDailyHint' : 'modeEachHint', { a, b })}</small>
-        </button>`).join('')}
-    </div>
-    <p class="hint">💡 ${tr('modeWhy')}</p>`, 'mode');
-}
-
-function pickPerDay() {
-  render(`
-    <h1>${tr('perDayTitle')}</h1>
-    <div class="options">${[1, 2, 3, 5].map((n, i) => `
-      <button class="option ${S.draft.perDay === n ? 'on' : ''}" data-a="setPerDay" data-v="${n}">
-        <b>${tr('perDay')[i]}</b><small>${tr('perDayHint')[i]}</small>
-      </button>`).join('')}</div>
-    <p class="hint">💡 ${tr('perDayMore')}</p>`, 'perDay');
-}
-
-function pickKind() {
-  render(`
-    <h1>${tr('kindTitle')}</h1>
-    <div class="options">
-      <button class="option ${S.draft.defaultKind === 'video' ? 'on' : ''}" data-a="setKind" data-v="video">
-        <b>🎥 ${tr('kindVideo')}</b><small>${tr('kindVideoHint')}</small></button>
-      <button class="option ${S.draft.defaultKind === 'audio' ? 'on' : ''}" data-a="setKind" data-v="audio">
-        <b>🎙️ ${tr('kindAudio')}</b><small>${tr('kindAudioHint')}</small></button>
-    </div>`, 'kind');
-}
-
-async function saveDraft() {
+async function setLang(lang) {
+  const ui = lang === 'teo' ? 'vi' : lang;                 // Teochew has no written UI: Vietnamese screens
+  const cur = S.profile.langs || [];
+  const langs = cur.length > 1 && cur.includes(lang) ? cur : [lang];   // keep a rotation the family set up
   render(`<div class="center"><div class="spinner"></div></div>`, 'loading');
-  try {
-    const out = await api('saveProfile', { profile: { ...S.draft, tz: Intl.DateTimeFormat().resolvedOptions().timeZone } }, k);
-    take(out);
-  } catch (err) { return fail(err, saveDraft); }
-  const wasSettings = S.settingsMode;
-  S.settingsMode = false;
-  wasSettings ? home() : next();
+  try { take(await api('saveProfile', { profile: { uiLang: ui, langs, tz: phoneTz() } }, k)); }
+  catch (err) { return fail(err, () => setLang(lang)); }
+  home();
 }
 
-function notify() {
-  render(`
-    <div class="center">
-      <p class="big">🔔</p>
-      <h1>${tr('notifyTitle')}</h1>
-      <p class="lead">${tr('notifyLead')}</p>
-      <button class="primary" data-a="enableNotify">${tr('notifyBtn')}</button>
-      <p class="hint">${tr('notifyHint')}</p>
-      <button class="ghost" data-a="skipNotify">${tr('later')}</button>
-    </div>`, 'notify');
+// Reminders are offered after the first story is sent, never as a screen before the first question.
+function needsNotify() {
+  return standalone && 'Notification' in window && 'PushManager' in window &&
+         Notification.permission === 'default' && !flag('skipNotify') && !!S.config.vapidPublicKey;
 }
 
 async function enableNotify() {
+  const b = document.querySelector('[data-a="enableNotify"]');
   try {
     const perm = await Notification.requestPermission();   // must run inside the tap
     if (perm === 'granted') {
       const reg = await navigator.serviceWorker.ready;
       const sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: urlB64(S.config.vapidPublicKey) });
       await api('subscribe', { sub: sub.toJSON() }, k);
-    }
-  } catch (err) { console.warn(err); }
+      if (b) b.textContent = tr('notifyOn');
+    } else if (b) b.remove();
+  } catch (err) { console.warn(err); if (b) b.remove(); }
   setFlag('skipNotify');
-  home();
 }
 
 function urlB64(s) {
@@ -316,28 +228,24 @@ function home() {
   const big = p.spoken || p.display;
   const sub = p.spoken && p.spoken !== p.display ? p.display : '';
   const canListen = !!p.audio || !!TTS[p.lang];
+  const tip = isIOS && !standalone ? `<p class="hint small center-text">${tr('homeTip')}</p>` : '';
   render(`
     <header class="top">
       <p class="meta">${where}</p>
       <button class="link" data-a="settings">${tr('settings')}</button>
     </header>
-    <div class="row-between">
-      <p class="answer-in"><span>🗣</span> ${tr('answerIn', { lang: `<b>${langName(p.lang)}</b>` })}</p>
-      <span class="today">${tr('todayCount', { d: Math.min(S.doneToday, per), n: per })}</span>
-    </div>
     ${context}
     <h1 class="question" lang="${p.spoken ? p.lang : L()}">${esc(big)}</h1>
     ${sub ? `<p class="translation">${esc(sub)}</p>` : ''}
-    <div class="listen">
-      ${canListen ? `<button class="listen-btn" data-a="play" data-v="${p.lang}">${tr('listen')}</button>` : ''}
-      ${p.lang !== L() ? `<button class="listen-btn alt" data-a="play" data-v="${L()}">${tr('listenIn', { lang: langName(L()) })}</button>` : ''}
-    </div>
+    ${canListen ? `<div class="listen"><button class="listen-btn" data-a="play" data-v="${p.lang}">${tr('listen')}</button></div>` : ''}
     <button class="primary huge" data-a="record" data-v="${kind}">
       <span class="emoji">${kind === 'video' ? '🎥' : '🎙️'}</span><span>${tr(kind === 'video' ? 'recordVideo' : 'recordAudio')}</span>
     </button>
-    <button class="secondary" data-a="record" data-v="${other}">${other === 'video' ? '🎥' : '🎙️'} ${tr(other === 'video' ? 'orVideo' : 'orAudio')}</button>
-    <p class="hint center-text">${tr('shortHint')}</p>
-    <button class="ghost" data-a="skip">${tr('skip')}</button>`, 'home');
+    <p class="links center-text">
+      <button class="link" data-a="record" data-v="${other}">${tr(other === 'video' ? 'orVideo' : 'orAudio')}</button> ·
+      <button class="link" data-a="skip">${tr('skip')}</button>
+    </p>
+    ${tip}`, 'home');
 }
 
 let player;
@@ -362,33 +270,52 @@ function play(lang) {
 
 // ─────────────────────────── record ───────────────────────────
 
+const wait = ms => new Promise(r => setTimeout(r, ms));
+
+/** Record: camera on (permission asked here) → 3, 2, 1 → recording → Done. */
 async function record(kind) {
   if (player) player.pause();
   if ('speechSynthesis' in window) speechSynthesis.cancel();
+  clearInterval(S.timer);
+  if (S.rec) S.rec.cancel();
   S.kind = kind;
   S.stage = null;
+  const run = S.run = {};                                       // this attempt (Retake / Cancel start a new one)
+  if (inAppBrowser() || !(navigator.mediaDevices && navigator.mediaDevices.getUserMedia)) return mediaHelp(kind, 'inApp');
   const p = S.next;
   render(`
     <div class="center">
-      ${kind === 'video' ? '<video id="preview" playsinline muted autoplay></video>'
-                         : `<div class="rec-indicator"><span class="dot"></span> ${tr('recording')}</div>`}
-      <p class="timer" id="timer">0:00</p>
+      ${kind === 'video' ? '<video id="preview" playsinline muted autoplay></video>' : ''}
+      <div class="rec-indicator" id="recInd">${kind === 'video' ? '' : '🎙️'}</div>
+      <p class="countdown" id="count">${tr('getReady')}</p>
+      <p class="timer" id="timer" hidden>0:00</p>
       <p class="hint">${esc(p.spoken || p.display)}</p>
-      <button class="stop" data-a="stop" aria-label="${tr('stop')}">⏹<span>${tr('stop')}</span></button>
+      <button class="stop" data-a="stop" id="stopBtn" hidden aria-label="${tr('stop')}">⏹<span>${tr('stop')}</span></button>
+      <button class="ghost" data-a="cancelRec" id="cancelBtn">${tr('cancel')}</button>
     </div>`, 'recording');
-  if (inAppBrowser() || !(navigator.mediaDevices && navigator.mediaDevices.getUserMedia)) return mediaHelp(kind, 'inApp');
   try {
     S.rec = new Recorder(kind);
-    await S.rec.start($('#preview'));
+    await S.rec.open($('#preview'));
   } catch (err) {
     console.warn(err);
     if (S.rec) S.rec.cancel();
+    if (S.run !== run) return;
     const n = (err && err.name) || '';
     if (/NotAllowed|Security|Permission/i.test(n + err.message)) return mediaHelp(kind, 'denied');
     if (/NotReadable|AbortError|TrackStart/i.test(n)) return mediaHelp(kind, 'busy');
     if (/NotFound|Overconstrained|DevicesNotFound/i.test(n)) return mediaHelp(kind, 'noCam');
     return fail(err, () => record(kind));
   }
+  for (const n of [3, 2, 1]) {
+    if (S.run !== run) return;
+    $('#count').textContent = n;
+    await wait(1000);
+  }
+  if (S.run !== run) return;
+  try { S.rec.begin(); } catch (err) { S.rec.cancel(); return fail(err, () => record(kind)); }
+  $('#count').hidden = true; $('#cancelBtn').hidden = true;
+  $('#timer').hidden = false; $('#stopBtn').hidden = false;
+  $('#recInd').innerHTML = `<span class="dot"></span> ${tr('recording')}`;
   S.timer = setInterval(() => {
     const s = (Date.now() - S.rec.startedAt) / 1000;
     const el = $('#timer');
@@ -397,9 +324,17 @@ async function record(kind) {
   }, 250);
 }
 
+function cancelRec() {
+  S.run = null;
+  clearInterval(S.timer);
+  if (S.rec) S.rec.cancel();
+  S.rec = null;
+  home();
+}
+
 async function stop() {
   clearInterval(S.timer);
-  if (!S.rec || S.rec.stopping) return;
+  if (!S.rec || !S.rec.rec || S.rec.stopping) return;
   S.rec.stopping = true;
   S.blob = await S.rec.stop();
   const url = URL.createObjectURL(S.blob);
@@ -409,21 +344,9 @@ async function stop() {
       <div id="playback">${S.kind === 'video'
         ? `<video src="${url}" controls playsinline></video>`
         : `<audio src="${url}" controls></audio>`}</div>
-      ${whenChips()}
       <button class="primary huge" data-a="send"><span class="emoji">✅</span><span>${tr('send')}</span></button>
-      <button class="ghost" data-a="redo">${tr('redo')}</button>
+      <button class="secondary" data-a="redo">${tr('redo')}</button>
     </div>`, 'review');
-}
-
-function whenChips() {
-  const def = S.stage || ({ early: 'child', legacy: '' }[S.next.stage] ?? S.next.stage);
-  return `
-    <div class="when">
-      <p class="when-title">${tr('whenTitle')}</p>
-      <div class="chips">${STAGE_CHIPS.map(st => `
-        <button class="chip ${st === def ? 'on' : ''}" data-a="setStage" data-v="${st}">${tr('stage')[st]}</button>`).join('')}</div>
-      <p class="hint small">${tr('whenHint')}</p>
-    </div>`;
 }
 
 async function send() {
@@ -492,6 +415,7 @@ function thanks() {
       <p class="lead">${tr('saved')}</p>
       ${more ? `<button class="primary" data-a="home">${tr('nextQ')} →</button>`
              : `<p class="hint">${tr('allDone')}</p><button class="secondary" data-a="oneMore">${tr('oneMore')}</button>`}
+      ${needsNotify() ? `<button class="secondary" data-a="enableNotify">🔔 ${tr('notifyBtn')}</button>` : ''}
       <button class="ghost" data-a="rest">${tr('enough')}</button>
     </div>`, 'done');
 }
@@ -560,7 +484,7 @@ async function rest() {
 
 /** Built-in browsers of chat/social apps usually block the camera: ask to open in Safari instead. */
 function inAppBrowser() {
-  return /FBAN|FBAV|FB_IAB|FBIOS|Instagram|Messenger|Line\/|Zalo|MicroMessenger|TikTok|Snapchat|GSA\//i.test(navigator.userAgent);
+  return /FBAN|FBAV|FB_IAB|FBIOS|Instagram|Messenger|Line\/|Zalo|MicroMessenger|TikTok|Snapchat|GSA\/|; wv\)/i.test(navigator.userAgent);
 }
 
 function mediaHelp(kind, why) {
@@ -597,20 +521,9 @@ const actions = {
   home: () => (S.profile ? (S.extra = S.doneToday >= (S.profile.perDay || 1) ? S.extra : false, home()) : boot()),
   welcomeLang: v => { S.draft = { uiLang: v }; welcome(); },
   demoLogin,
-  setUi,
-  skipInstall: () => { setFlag('skipInstall'); next(); },
-  toggleLang: v => {
-    const l = S.draft.langs;
-    l.includes(v) ? l.splice(l.indexOf(v), 1) : l.push(v);
-    pickLangs();
-  },
-  langsNext: () => (S.draft.langs.length > 1 ? pickMode() : pickPerDay()),
-  setMode: v => { S.draft.mode = v; pickPerDay(); },
-  setPerDay: v => { S.draft.perDay = Number(v); pickKind(); },
-  setKind: v => { S.draft.defaultKind = v; saveDraft(); },
+  setLang,
   enableNotify,
-  skipNotify: () => { setFlag('skipNotify'); home(); },
-  settings: () => startSetup(true),
+  settings: pickUi,
   play,
   record,
   stop,
@@ -622,11 +535,8 @@ const actions = {
   rest,
   anotherQ: () => { S.extra = true; home(); },
   redo: () => record(S.kind),
+  cancelRec,
   oneMore: () => { S.extra = true; home(); },
-  setStage: v => {
-    S.stage = v;
-    document.querySelectorAll('[data-a="setStage"]').forEach(b => b.classList.toggle('on', b.dataset.v === v));
-  },
 };
 
 app.addEventListener('click', e => {

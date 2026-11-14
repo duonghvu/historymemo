@@ -30,7 +30,8 @@ const kindOf = m => (m.startsWith('video') ? 'video' : 'audio');
 export class Recorder {
   constructor(kind) { this.kind = kind; this.chunks = []; }
 
-  async start(previewEl) {
+  /** Camera/mic on (this is when the phone asks for permission) + live preview. Recording starts with begin(). */
+  async open(previewEl) {
     const constraints = this.kind === 'video'
       ? { audio: { echoCancellation: true, noiseSuppression: true },
           video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 }, frameRate: { ideal: 24, max: 30 } } }
@@ -41,6 +42,9 @@ export class Recorder {
       previewEl.muted = true;
       await previewEl.play().catch(() => {});
     }
+  }
+
+  begin() {
     this.mime = pickMime(this.kind);
     const opts = { audioBitsPerSecond: 64000 };
     if (this.kind === 'video') opts.videoBitsPerSecond = 900000;
@@ -50,6 +54,8 @@ export class Recorder {
     this.startedAt = Date.now();
     this.rec.start(1000);
   }
+
+  async start(previewEl) { await this.open(previewEl); this.begin(); }
 
   stop() {
     return new Promise(resolve => {

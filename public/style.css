@@ -102,3 +102,8 @@ button[disabled] { opacity: .4; }
 .chips { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .chips .chip { width: 100%; min-height: 52px; font-size: 17px; border-radius: 14px; }
 .chips .chip.on { background: var(--red); border-color: var(--red); color: #fff; }
+
+/* record: 3-2-1 countdown, small links under the big button */
+.countdown { font-size: 96px; font-weight: 800; color: var(--red); margin: 0; line-height: 1; min-height: 1em; font-variant-numeric: tabular-nums; }
+.links { margin: 4px 0 0; color: var(--muted); }
+.links .link { font-size: 18px; text-decoration: underline; min-height: 48px; }
