@@ -1,6 +1,7 @@
 // GET /api/config → public settings for the pages
 //   ?check=1 → which server settings are present (never the values; the admin key only as an 8-char SHA-256 fingerprint)
 import crypto from 'node:crypto';
+import './_lib.js'; // trims the settings
 
 const fp = v => (v ? crypto.createHash('sha256').update(v).digest('hex').slice(0, 8) : null);
 

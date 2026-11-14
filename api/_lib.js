@@ -1,6 +1,12 @@
 // Shared helpers for the API functions (Vercel in production, dev/server.mjs locally).
 import crypto from 'node:crypto';
 
+// Values pasted into Vercel often carry a stray space or line break: ignore them.
+for (const k of ['GAS_URL', 'GAS_SECRET', 'ADMIN_KEY', 'SESSION_SECRET', 'ADMIN_EMAILS', 'GOOGLE_CLIENT_ID',
+                 'VAPID_PUBLIC_KEY', 'VAPID_PRIVATE_KEY', 'VAPID_SUBJECT']) {
+  if (typeof process.env[k] === 'string') process.env[k] = process.env[k].trim();
+}
+
 export const ADMIN_ACTIONS = new Set([
   'storytellers', 'createStoryteller', 'updateStoryteller',
   'questions', 'prompt', 'promptTicket', 'promptDone', 'testPush',
