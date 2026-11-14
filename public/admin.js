@@ -92,6 +92,7 @@ async function load() {
   root.querySelectorAll('[data-do]').forEach(b => (b.onclick = () => doAction(b)));
   root.querySelectorAll('form.edit').forEach(f => (f.onsubmit = e => { e.preventDefault(); submit(f); }));
   root.querySelectorAll('form.ask').forEach(f => (f.onsubmit = e => { e.preventDefault(); ask(f); }));
+  root.querySelectorAll('[data-del]').forEach(b => (b.onclick = () => del(b)));
   root.querySelectorAll('[data-copy]').forEach(b => (b.onclick = () => navigator.clipboard.writeText(b.dataset.copy).then(() => (b.textContent = 'Copied ✓'))));
   root.querySelectorAll('[data-test]').forEach(b => (b.onclick = () => testPush(b)));
   root.querySelectorAll('[data-qr]').forEach(el => {
@@ -183,7 +184,8 @@ function form(st, id) {
       </div>
       <div class="row">
         <label>Reminder hours (local)<input name="hours" value="${esc((st.hours || []).join(', '))}" placeholder="8, 19"></label>
-        <label>Time zone<input name="tz" value="${esc(st.tz || '')}" placeholder="Asia/Ho_Chi_Minh"></label>
+        <label>Time zone (city name, e.g. America/Chicago)<input name="tz" list="tzs" value="${esc(st.tz || '')}" placeholder="Asia/Ho_Chi_Minh"
+          pattern="(UTC|GMT|[A-Za-z]+(/[A-Za-z0-9_+\-]+)+)" title="A time zone like America/Chicago or Asia/Ho_Chi_Minh"></label>
         <label>Family emails (get each story)<input name="family" value="${esc((st.family || []).join(', '))}" placeholder="me@gmail.com, sister@gmail.com"></label>
       </div>
       <div class="row">
@@ -191,11 +193,17 @@ function form(st, id) {
         <label class="inline"><input type="checkbox" name="followUps" value="on" ${st.followUps !== false ? 'checked' : ''}>
           AI follow-up questions (gentle "tell me more", at most 1 a day, pauses when they skip)</label>
       </div>
-      <div class="row"><button class="primary sm" type="submit">${id === 'new' ? 'Create storyteller' : 'Save'}</button></div>
+      <div class="row"><button class="primary sm" type="submit">${id === 'new' ? 'Create storyteller' : 'Save'}</button>
+        ${id === 'new' ? '<span class="muted">Creating takes about 20 seconds (folder, story index, question Sheet).</span>'
+          : `<button class="secondary sm" type="button" data-del="${esc(id)}" data-name="${esc(st.name)}">🗑 Delete storyteller</button>`}</div>
     </form>`;
 }
 
 async function submit(f) {
+  const btn = f.querySelector('[type=submit]');
+  if (btn.disabled) return;
+  const label = btn.textContent;
+  btn.disabled = true; btn.textContent = f.dataset.id === 'new' ? 'Creating… (about 20 s)' : 'Saving…';
   const d = new FormData(f);
   const fields = Object.fromEntries([...d.entries()].filter(([k2]) => k2 !== 'langs'));
   fields.langs = d.getAll('langs');
@@ -204,7 +212,16 @@ async function submit(f) {
     if (f.dataset.id === 'new') await api('createStoryteller', { fields }, a);
     else await api('updateStoryteller', { id: f.dataset.id, fields }, a);
     await load();
-  } catch (err) { alert(err.message); }
+  } catch (err) { alert(err.message); btn.disabled = false; btn.textContent = label; }
+}
+
+async function del(b) {
+  const name = b.dataset.name;
+  if (!confirm(`Delete storyteller "${name}"?\n\nTheir private link stops working.`)) return;
+  const trash = confirm(`Also move "${name}"'s Drive folder (recordings, Sheet, book) to the trash?\n\nOK = move to trash (restorable for ~30 days)\nCancel = keep the folder`);
+  b.disabled = true; b.textContent = 'Deleting…';
+  try { await api('deleteStoryteller', { id: b.dataset.del, trash }, a); await load(); }
+  catch (err) { alert(err.message); b.disabled = false; b.textContent = '🗑 Delete storyteller'; }
 }
 
 async function ask(f) {

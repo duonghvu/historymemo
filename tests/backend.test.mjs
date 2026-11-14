@@ -300,3 +300,18 @@ test('missing: a recording that disappeared from Drive → its question is asked
   assert.equal(me.next.text.en, s.question.en);
   call('buildBook', { id: profile.id });                                         // book skips the missing one
 });
+
+test('admin: delete a storyteller (and optionally trash the folder); bad time zones are ignored', () => {
+  const made = call('createStoryteller', { fields: { name: 'Dup', tz: 'Central US' } });
+  assert.ok(made.ok, JSON.stringify(made));
+  const st = g.ctx.getSt_(made.id);
+  assert.notEqual(st.tz, 'Central US');
+  call('updateStoryteller', { id: made.id, fields: { tz: 'America/Chicago' } });
+  assert.equal(g.ctx.getSt_(made.id).tz, 'America/Chicago');
+  const folder = g.pathOf(st.folderId);
+  assert.ok(fs.existsSync(folder));
+  assert.equal(call('deleteStoryteller', { id: made.id, trash: true }).trashed, true);
+  assert.equal(g.ctx.getSt_(made.id), null);
+  assert.ok(!call('storytellers').list.some(s => s.id === made.id));
+  assert.ok(!fs.existsSync(folder));
+});

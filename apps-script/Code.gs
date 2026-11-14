@@ -103,12 +103,15 @@ function setup() {
 
 function doGet() { return json_({ ok: true, app: 'historymemo' }); }
 
+const READ_ONLY = { storytellers: 1, questions: 1, prompt: 1 };
+
 function doPost(e) {
   let req;
   try { req = JSON.parse(e.postData.contents); } catch (err) { return json_({ error: 'bad json' }); }
   if (!req.secret || req.secret !== prop_('SECRET')) return json_({ error: 'unauthorized' });
-  const lock = LockService.getScriptLock();
-  lock.waitLock(30000);
+  // Read-only admin screens don't queue behind slow work (creating a storyteller takes ~20 s).
+  const lock = READ_ONLY[req.action] ? null : LockService.getScriptLock();
+  if (lock && !lock.tryLock(45000)) return json_({ error: 'busy: HistoryMemo is finishing another task, please try again in a moment' });
   try {
     if (FATHER[req.action]) {
       const st = findByKey_(req.key);
@@ -121,7 +124,7 @@ function doPost(e) {
   } catch (err) {
     return json_({ error: String((err && err.message) || err) });
   } finally {
-    lock.releaseLock();
+    if (lock) lock.releaseLock();
   }
 }
 
@@ -303,6 +306,19 @@ const ADMIN = {
     if (plan.stageIdx >= TIMELINE_STAGES.length) return { error: 'All life stages already generated' };
     const added = generateStage_(st, plan);
     return { ok: true, added, stage: TIMELINE_STAGES[plan.stageIdx - 1], total: plan.timeline.length };
+  },
+
+  // Remove a storyteller (e.g. a duplicate). trash: true also moves their Drive folder to the trash (restorable ~30 days).
+  deleteStoryteller(req) {
+    const st = getSt_(req.id);
+    if (!st) return { error: 'not found' };
+    const ids = JSON.parse(prop_('ST_INDEX') || '[]').filter(id => id !== st.id);
+    const props = PropertiesService.getScriptProperties();
+    props.setProperty('ST_INDEX', JSON.stringify(ids));
+    props.deleteProperty('ST_' + st.id);
+    let trashed = false;
+    if (req.trash) { try { root_(st).setTrashed(true); trashed = true; } catch (err) { Logger.log('trash: ' + err); } }
+    return { ok: true, trashed };
   },
 
   // A family member asks a question from the admin page (same as typing it in the Sheet's "Add questions" tab).
@@ -968,7 +984,7 @@ ${VI_RULE}`, 800));
 
 function withLock_(fn) {
   const lock = LockService.getScriptLock();
-  lock.waitLock(30000);
+  if (!lock.tryLock(30000)) { Logger.log('busy, skipped this round'); return; }
   try { return fn(); } catch (err) { Logger.log(err); } finally { lock.releaseLock(); }
 }
 
@@ -1106,7 +1122,7 @@ function createSt_(f) {
     id, key: Utilities.getUuid().replace(/-/g, '') + Utilities.getUuid().replace(/-/g, '').slice(0, 8),
     name, callName: String(f.callName || name).slice(0, 20), email: '',
     uiLang, langs: [], mode: 'daily', perDay: 1, hours: DEFAULT_HOURS[1].slice(), defaultKind: 'video',
-    tz: f.tz || Session.getScriptTimeZone(), start: '', progress: 0,
+    tz: f.tz && validTz_(String(f.tz).trim()) ? String(f.tz).trim() : Session.getScriptTimeZone(), start: '', progress: 0,
     folderId: folder.getId(), indexDocId: doc.getId(),
     family: [], subs: [], answered: {}, sent: {},
   };
@@ -1149,7 +1165,7 @@ function applyAdminFields_(st, f) {
     if (hrs.length) st.hours = hrs;
   }
   if (!st.hours || st.hours.length < st.perDay) st.hours = DEFAULT_HOURS[st.perDay].slice();
-  if (f.tz) st.tz = String(f.tz);
+  if (f.tz && validTz_(String(f.tz).trim())) st.tz = String(f.tz).trim();
   if (f.followUps !== undefined) st.followUps = f.followUps === true || f.followUps === 'on';
   if (f.family !== undefined) {
     st.family = String(f.family).split(/[,\s;]+/).filter(e => /@/.test(e));
@@ -1160,6 +1176,9 @@ function applyAdminFields_(st, f) {
     });
   }
 }
+
+/** "Asia/Ho_Chi_Minh", "America/Chicago", "UTC". Java silently turns unknown names (e.g. "Central US") into GMT. */
+function validTz_(tz) { return /^(UTC|GMT|[A-Za-z]+(\/[A-Za-z0-9_+-]+)+)$/.test(tz); }
 
 function rand_() { return Utilities.getUuid().replace(/-/g, '').slice(0, 8); }
 function addDays_(st, days) {

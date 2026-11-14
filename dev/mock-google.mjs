@@ -42,6 +42,7 @@ export function createMockGoogle(projectDir, dataDir) {
       const hits = Object.keys(reg).filter(k => reg[k].parent === id && reg[k].kind === 'folder' && reg[k].name === name);
       return { hasNext: () => hits.length > 0, next: () => folderObj(hits.shift()) };
     },
+    setTrashed: () => { fs.rmSync(pathOf(id), { recursive: true, force: true }); delete reg[id]; saveReg(); },
     addViewer: email => console.log(`  [mock] share folder "${reg[id].name}" with ${email} (view)`),
     getFilesByName: name => {
       const hits = Object.keys(reg).filter(k => reg[k].parent === id && reg[k].kind !== 'folder' && reg[k].name === name);
@@ -148,6 +149,7 @@ export function createMockGoogle(projectDir, dataDir) {
       getProperty: k => (k in props ? props[k] : null),
       setProperty: (k, v) => { props[k] = String(v); saveProps(); },
       setProperties: o => { Object.assign(props, o); saveProps(); },
+      deleteProperty: k => { delete props[k]; saveProps(); },
     }) },
     DriveApp: {
       createFolder: name => folderObj(addItem('folder', name, null)),
@@ -171,7 +173,7 @@ export function createMockGoogle(projectDir, dataDir) {
     },
     LanguageApp: { translate: (text, from, to) => `[${to}] ${text}` },
     Session: { getScriptTimeZone: () => tz },
-    LockService: { getScriptLock: () => ({ waitLock() {}, releaseLock() {} }) },
+    LockService: { getScriptLock: () => ({ waitLock() {}, tryLock: () => true, releaseLock() {} }) },
     ScriptApp: {
       getOAuthToken: () => 'mock-token',
       getProjectTriggers: () => triggers.map(fn => ({ getHandlerFunction: () => fn })),
