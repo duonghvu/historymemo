@@ -1,0 +1,21 @@
+{
+  "name": "historymemo",
+  "version": "0.4.0",
+  "private": true,
+  "type": "module",
+  "description": "HistoryMemo: one short life-story question a day, answered by voice or video in English, Vietnamese, Japanese or Teochew. Saved to Google Drive, organised by user.",
+  "scripts": {
+    "dev:mock": "node dev/server.mjs --mock",
+    "dev": "node dev/server.mjs",
+    "vapid": "web-push generate-vapid-keys",
+    "deploy": "vercel --prod",
+    "test": "node --test tests/backend.test.mjs tests/upload.test.mjs",
+    "video-book": "node tools/video-book.mjs"
+  },
+  "dependencies": {
+    "web-push": "^3.6.7"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

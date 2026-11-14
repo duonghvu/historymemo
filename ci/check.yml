@@ -1,0 +1,19 @@
+name: check
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Syntax check
+        run: for f in public/*.js api/*.js dev/*.mjs; do node --check "$f"; done
+      - name: Backend tests (real Apps Script code, simulated Google)
+        run: npm test

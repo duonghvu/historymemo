@@ -1,0 +1,7 @@
+dev/
+tests/
+apps-script/
+local-data/
+.github/
+*.md
+tools/

@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>HistoryMemo</title>
+  <meta name="description" content="One short question a day. Tell your life story by voice or video, in your own languages.">
+  <meta name="theme-color" content="#b3261e">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="HistoryMemo">
+  <link rel="icon" href="/icon-192.png">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link id="manifest" rel="manifest" href="/api/manifest">
+  <script>
+    // Put the private key into the manifest before iOS reads it for "Add to Home Screen".
+    (function () {
+      var k = new URLSearchParams(location.search).get('k');
+      try { if (k) localStorage.setItem('k', k); else k = localStorage.getItem('k'); } catch (e) {}
+      if (k) document.getElementById('manifest').href = '/api/manifest?k=' + encodeURIComponent(k);
+    })();
+  </script>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <main id="app" aria-live="polite"></main>
+  <script type="module" src="/app.js"></script>
+</body>
+</html>
