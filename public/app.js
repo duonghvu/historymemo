@@ -376,10 +376,19 @@ async function record(kind) {
       <p class="hint">${esc(p.spoken || p.display)}</p>
       <button class="stop" data-a="stop" aria-label="${tr('stop')}">⏹<span>${tr('stop')}</span></button>
     </div>`, 'recording');
+  if (inAppBrowser() || !(navigator.mediaDevices && navigator.mediaDevices.getUserMedia)) return mediaHelp(kind, 'inApp');
   try {
     S.rec = new Recorder(kind);
     await S.rec.start($('#preview'));
-  } catch (err) { return fail(err, () => record(kind)); }
+  } catch (err) {
+    console.warn(err);
+    if (S.rec) S.rec.cancel();
+    const n = (err && err.name) || '';
+    if (/NotAllowed|Security|Permission/i.test(n + err.message)) return mediaHelp(kind, 'denied');
+    if (/NotReadable|AbortError|TrackStart/i.test(n)) return mediaHelp(kind, 'busy');
+    if (/NotFound|Overconstrained|DevicesNotFound/i.test(n)) return mediaHelp(kind, 'noCam');
+    return fail(err, () => record(kind));
+  }
   S.timer = setInterval(() => {
     const s = (Date.now() - S.rec.startedAt) / 1000;
     const el = $('#timer');
@@ -547,6 +556,40 @@ async function rest() {
   home();
 }
 
+// ─────────────────────────── camera / microphone help ───────────────────────────
+
+/** Built-in browsers of chat/social apps usually block the camera: ask to open in Safari instead. */
+function inAppBrowser() {
+  return /FBAN|FBAV|FB_IAB|FBIOS|Instagram|Messenger|Line\/|Zalo|MicroMessenger|TikTok|Snapchat|GSA\//i.test(navigator.userAgent);
+}
+
+function mediaHelp(kind, why) {
+  const steps = why === 'inApp' ? tr('inAppSteps') : why === 'denied' ? tr(isIOS ? 'permIOS' : 'permAndroid') : [];
+  const title = { inApp: 'inAppTitle', denied: 'permTitle', busy: 'busyTitle', noCam: 'noCamTitle' }[why];
+  const lead = { inApp: 'inAppLead', denied: 'permLead', busy: 'busyLead', noCam: 'noCamLead' }[why];
+  render(`
+    <div class="center">
+      <p class="big">${why === 'inApp' ? '🧭' : '📷'}</p>
+      <h1>${tr(title)}</h1>
+      <p class="lead">${tr(lead)}</p>
+      ${steps.length ? `<ol class="steps">${steps.map(x => `<li>${x}</li>`).join('')}</ol>` : ''}
+      ${why === 'inApp' ? `<button class="primary" data-a="copyLink">${tr('copyLink')}</button>`
+                        : why !== 'noCam' ? `<button class="primary" data-a="record" data-v="${kind}">${tr('tryAgain')}</button>` : ''}
+      ${kind === 'video' && why !== 'inApp' ? `<button class="secondary" data-a="record" data-v="audio">${tr('voiceOnly')}</button>` : ''}
+      <button class="ghost" data-a="home">${tr('home')}</button>
+    </div>`, 'mediaHelp');
+}
+
+async function copyLink() {
+  const link = `${location.origin}/?k=${encodeURIComponent(k || '')}`;
+  try { await navigator.clipboard.writeText(link); } catch {
+    const t = document.createElement('textarea'); t.value = link; document.body.append(t); t.select();
+    try { document.execCommand('copy'); } catch {} t.remove();
+  }
+  const b = document.querySelector('[data-a="copyLink"]');
+  if (b) b.textContent = tr('copied');
+}
+
 // ─────────────────────────── buttons ───────────────────────────
 
 const actions = {
@@ -573,6 +616,7 @@ const actions = {
   stop,
   send,
   sendWaiting,
+  copyLink,
   waitLater: () => { S.waitLater = true; home(); },   // keep it on the phone, carry on; it is sent next time
   skip,
   rest,
