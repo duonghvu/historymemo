@@ -301,6 +301,7 @@ async function record(kind) {
     if (S.rec) S.rec.cancel();
     if (S.run !== run) return;
     const n = (err && err.name) || '';
+    S.mediaErr = `${n || 'Error'}: ${(err && err.message) || ''}`.slice(0, 120);
     if (/NotAllowed|Security|Permission/i.test(n + err.message)) return mediaHelp(kind, 'denied');
     if (/NotReadable|AbortError|TrackStart/i.test(n)) return mediaHelp(kind, 'busy');
     if (/NotFound|Overconstrained|DevicesNotFound/i.test(n)) return mediaHelp(kind, 'noCam');
@@ -337,6 +338,17 @@ async function stop() {
   if (!S.rec || !S.rec.rec || S.rec.stopping) return;
   S.rec.stopping = true;
   S.blob = await S.rec.stop();
+  if (!S.blob || !S.blob.size) {                        // stopped within a second: nothing was captured
+    S.blob = null;
+    render(`
+      <div class="center">
+        <p class="big">⏱</p>
+        <h1>${tr('tooShort')}</h1>
+        <button class="primary huge" data-a="redo"><span class="emoji">${S.kind === 'video' ? '🎥' : '🎙️'}</span><span>${tr('redo')}</span></button>
+        <button class="ghost" data-a="home">${tr('home')}</button>
+      </div>`, 'tooShort');
+    return;
+  }
   const url = URL.createObjectURL(S.blob);
   render(`
     <div class="center">
@@ -487,6 +499,20 @@ function inAppBrowser() {
   return /FBAN|FBAV|FB_IAB|FBIOS|Instagram|Messenger|Line\/|Zalo|MicroMessenger|TikTok|Snapchat|GSA\/|; wv\)/i.test(navigator.userAgent);
 }
 
+/** One grey line for screenshots: what failed, where (iPhone/Android, Home Screen app or browser), permission state. */
+async function mediaDiag(why) {
+  let perm = '';
+  try {
+    const c = await navigator.permissions.query({ name: 'camera' });
+    const m = await navigator.permissions.query({ name: 'microphone' });
+    perm = ` · cam:${c.state} mic:${m.state}`;
+  } catch {}
+  const os = isIOS ? 'iOS ' + ((navigator.userAgent.match(/OS (\d+[_\d]*)/) || [])[1] || '').replace(/_/g, '.')
+           : /Android ([\d.]+)/.test(navigator.userAgent) ? 'Android ' + navigator.userAgent.match(/Android ([\d.]+)/)[1] : 'other';
+  const el = $('#diag');
+  if (el) el.textContent = `${why} · ${os} · ${standalone ? 'home-screen app' : 'browser'}${perm}${S.mediaErr ? ' · ' + S.mediaErr : ''}`;
+}
+
 function mediaHelp(kind, why) {
   const steps = why === 'inApp' ? tr('inAppSteps') : why === 'denied' ? tr(isIOS ? 'permIOS' : 'permAndroid') : [];
   const title = { inApp: 'inAppTitle', denied: 'permTitle', busy: 'busyTitle', noCam: 'noCamTitle' }[why];
@@ -501,7 +527,9 @@ function mediaHelp(kind, why) {
                         : why !== 'noCam' ? `<button class="primary" data-a="record" data-v="${kind}">${tr('tryAgain')}</button>` : ''}
       ${kind === 'video' && why !== 'inApp' ? `<button class="secondary" data-a="record" data-v="audio">${tr('voiceOnly')}</button>` : ''}
       <button class="ghost" data-a="home">${tr('home')}</button>
+      <p class="hint small" id="diag" style="opacity:.6"></p>
     </div>`, 'mediaHelp');
+  mediaDiag(why);
 }
 
 async function copyLink() {
