@@ -130,7 +130,10 @@ function doPost(e) {
 
 // Actions for the storyteller's phone (authenticated by their private key)
 const FATHER = {
-  me(st) {
+  me(st, req) {
+    // The phone's own time zone wins: reminders follow the storyteller (travel, daylight saving).
+    const tz = req && req.tz ? String(req.tz).trim() : '';
+    if (tz && validTz_(tz) && (tz !== st.tz || st.tzSource !== 'phone')) { st.tz = tz; st.tzSource = 'phone'; saveSt_(st); }
     const plan = ensureTimeline_(st);
     return { profile: publicProfile_(st), next: withAudio_(currentPrompt_(st, plan)),
              doneToday: doneToday_(st), rest: st.restDay === localDate_(st), maxSeconds: MAX_SECONDS };
@@ -149,7 +152,7 @@ const FATHER = {
       st.perDay = Number(p.perDay);
       st.hours = DEFAULT_HOURS[st.perDay].slice();
     }
-    if (p.tz && /^[A-Za-z_]+\/[A-Za-z_\/+-]+$/.test(p.tz)) st.tz = p.tz;
+    if (p.tz && validTz_(String(p.tz).trim())) { st.tz = String(p.tz).trim(); st.tzSource = 'phone'; }
     saveSt_(st);
     return FATHER.me(st);
   },
@@ -1147,7 +1150,7 @@ function localDate_(st) { return Utilities.formatDate(new Date(), st.tz || Sessi
 function publicProfile_(st) {
   return { id: st.id, name: st.name, callName: st.callName, email: st.email || '', uiLang: st.uiLang,
            langs: st.langs || [], mode: st.mode, perDay: st.perDay, hours: st.hours, tz: st.tz,
-           start: st.start, defaultKind: st.defaultKind || 'video', progress: st.progress || 0,
+           start: st.start, defaultKind: st.defaultKind || 'video', progress: st.progress || 0, tzSource: st.tzSource || 'admin',
            extraDone: st.extraDone || 0 };
 }
 

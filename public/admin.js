@@ -127,7 +127,7 @@ function card(st) {
             <button class="secondary sm" data-test="${st.id}">Send test notification</button>
             <a class="sm" href="${esc(st.folderUrl)}" target="_blank" rel="noopener">Open Drive folder ↗</a>
           </div>
-          <span class="muted">${st.email ? `Google: ${esc(st.email)} · ` : ''}${esc(st.tz)} · started ${esc(st.start)}</span>
+          <span class="muted">${st.email ? `Google: ${esc(st.email)} · ` : ''}🕗 ${esc(st.tz)} ${st.tzSource === 'phone' ? '(from their phone)' : '(set here; their phone updates it when they open the app)'} · started ${esc(st.start)}</span>
           <div class="progress"><div style="width:${Math.min(100, st.progress / 56 * 100)}%"></div></div>
           <span class="muted"><b>${st.stories}</b> stories ·
             ${st.phase === 'life' ? `life questions ${Math.min(st.progress, 56)}/56`
@@ -184,7 +184,7 @@ function form(st, id) {
       </div>
       <div class="row">
         <label>Reminder hours (local)<input name="hours" value="${esc((st.hours || []).join(', '))}" placeholder="8, 19"></label>
-        <label>Time zone (city name, e.g. America/Chicago)<input name="tz" list="tzs" value="${esc(st.tz || '')}" placeholder="Asia/Ho_Chi_Minh"
+        <label>Time zone (their phone sets it automatically; this is only used until then)<input name="tz" list="tzs" value="${esc(st.tz || '')}" placeholder="Asia/Ho_Chi_Minh"
           pattern="(UTC|GMT|[A-Za-z]+(/[A-Za-z0-9_+\-]+)+)" title="A time zone like America/Chicago or Asia/Ho_Chi_Minh"></label>
         <label>Family emails (get each story)<input name="family" value="${esc((st.family || []).join(', '))}" placeholder="me@gmail.com, sister@gmail.com"></label>
       </div>

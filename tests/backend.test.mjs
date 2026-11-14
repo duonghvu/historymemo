@@ -315,3 +315,29 @@ test('admin: delete a storyteller (and optionally trash the folder); bad time zo
   assert.ok(!call('storytellers').list.some(s => s.id === made.id));
   assert.ok(!fs.existsSync(folder));
 });
+
+test('reminders follow the phone time zone: the phone sends it on every open, local hours are used', () => {
+  const made = call('createStoryteller', { fields: { name: 'Tz', tz: 'Asia/Ho_Chi_Minh', perDay: 2, langs: ['en'] } });
+  const key = g.ctx.getSt_(made.id).key;
+  assert.equal(call('me', { key, tz: 'Central US' }).profile.tz, 'Asia/Ho_Chi_Minh');   // junk ignored
+  const me = call('me', { key, tz: 'America/Chicago' });
+  assert.equal(me.profile.tz, 'America/Chicago');
+  assert.equal(me.profile.tzSource, 'phone');
+  // the hourly job sends at the storyteller's local hours (8:00 and 19:00 in Chicago)
+  const st = g.ctx.getSt_(made.id);
+  st.subs = [{ endpoint: 'https://push.example/1', keys: {} }]; g.ctx.saveSt_(st);
+  const hourNow = Number(g.ctx.Utilities.formatDate(new Date(), 'America/Chicago', 'H'));
+  let pushed = 0;
+  const realPush = g.ctx.pushTo_;
+  g.ctx.pushTo_ = () => { pushed++; return { ok: true }; };
+  const s2 = g.ctx.getSt_(made.id); s2.hours = [hourNow, (hourNow + 12) % 24]; g.ctx.saveSt_(s2);
+  g.hourly();
+  assert.equal(pushed, 1);
+  g.hourly();                                                                        // same hour: not twice
+  assert.equal(pushed, 1);
+  const s3 = g.ctx.getSt_(made.id); s3.hours = [(hourNow + 3) % 24, (hourNow + 12) % 24]; s3.sent = {}; g.ctx.saveSt_(s3);
+  g.hourly();
+  assert.equal(pushed, 1);                                                           // not this local hour
+  g.ctx.pushTo_ = realPush;
+  call('deleteStoryteller', { id: made.id, trash: true });
+});

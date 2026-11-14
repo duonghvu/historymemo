@@ -61,7 +61,7 @@ async function boot() {
   S.config = await fetch('/api/config').then(r => r.json()).catch(() => ({}));
   if (!k) return welcome();
   try {
-    const me = await api('me', {}, k);
+    const me = await api('me', { tz: phoneTz() }, k);   // reminders follow the phone's time zone
     take(me); S.maxSeconds = me.maxSeconds || 180;
     S.waiting = (await pending.list()).length;
     if (S.waiting && navigator.onLine !== false) return sendWaiting();   // finish earlier stories first, by itself
@@ -86,6 +86,8 @@ function needsNotify() {
   return standalone && 'Notification' in window && 'PushManager' in window &&
          Notification.permission === 'default' && !flag('skipNotify');
 }
+
+function phoneTz() { try { return Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch { return ''; } }
 
 function forget() { k = null; try { localStorage.removeItem('k'); } catch {} }
 
