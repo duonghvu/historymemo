@@ -106,6 +106,7 @@ test('book: transcripts + chronological order from roots/birth to today', () => 
   assert.ok(book.chapters >= 1);
   const md = fs.readFileSync(g.pathOf(g.ctx.getSt_(profile.id).bookDocId), 'utf8');
   const order = ['Cội nguồn', 'Ra đời', 'Tuổi thơ'].map(h => md.indexOf('## ' + h));
+  assert.match(md, /HistoryMemo là dịch vụ độc lập/);                         // AI disclaimer at the end of the book
   assert.ok(order[0] >= 0 && order[0] < order[1] && order[1] < order[2], md);
   const sorted = g.ctx.sortStories_([
     { stage: 'now', phase: 'diary', seq: 0, date: '2027-01-02' },

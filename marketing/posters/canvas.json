@@ -11,12 +11,13 @@
     "Poster-JA.dc.html": { "x": 2688, "y": 0, "w": 816, "h": 1056, "title": "日本語", "paper": "letter" },
     "Flyer-EN.dc.html": { "x": 0, "y": 1456, "w": 816, "h": 1056, "title": "Flyer · English", "paper": "letter" },
     "Flyer-VI.dc.html": { "x": 896, "y": 1456, "w": 816, "h": 1056, "title": "Flyer · Tiếng Việt", "paper": "letter" },
-    "Flyer-JA.dc.html": { "x": 1792, "y": 1456, "w": 794, "h": 1123, "title": "チラシ · 日本語 (A4)", "paper": "a4" }
+    "Flyer-JA.dc.html": { "x": 1792, "y": 1456, "w": 794, "h": 1123, "title": "チラシ · 日本語 (A4)", "paper": "a4" },
+    "Flyer-Test.dc.html": { "x": 2666, "y": 1456, "w": 816, "h": 1056, "title": "Demand test · digital book first · VI / EN / JA", "paper": "letter" }
   },
-  "order": ["Main.dc.html", "Poster-EN.dc.html", "Poster-VI.dc.html", "Poster-JA.dc.html", "Flyer-EN.dc.html", "Flyer-VI.dc.html", "Flyer-JA.dc.html"],
+  "order": ["Main.dc.html", "Poster-EN.dc.html", "Poster-VI.dc.html", "Poster-JA.dc.html", "Flyer-EN.dc.html", "Flyer-VI.dc.html", "Flyer-JA.dc.html", "Flyer-Test.dc.html"],
   "notes": {
     "heading": { "x": 0, "y": -260, "text": "HistoryMemo free-trial posters · US Letter", "kind": "title1", "maxW": 3504 },
-    "flyers": { "x": 0, "y": 1196, "text": "One-page flyers · what you get · Letter (Japan: A4)", "kind": "title1", "maxW": 2586 },
+    "flyers": { "x": 0, "y": 1196, "text": "One-page flyers · what you get · Letter (Japan: A4)", "kind": "title1", "maxW": 3482 },
     "howto": { "x": -680, "y": 0, "w": 560, "size": "m", "fill": "orange", "text": "Before printing: click any [PLACEHOLDER] and type the number of trial families and the book prices. Paste a QR code image into the dashed box if you have one.\n\nNew language: duplicate a poster or flyer and retype the text.\n\nThe privacy lines are a plain-language summary for a trial, not legal advice: have them reviewed before a public launch." }
   },
   "designSystems": []
