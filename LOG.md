@@ -68,8 +68,9 @@ No secrets in this file. Keys and passwords live only in Vercel env vars and App
 
 ## Paused here (2026-11-15), to do next
 1. Publish the Japanese poster (`Poster-JA.dc.html`, already written in the session scratchpad; rewrite if gone).
-2. DONE: consent + privacy page. Still to do: paste Code.gs into Apps Script (New version); confirm the operator name
-   on privacy.html ("Lina Daichi Agency" was inferred from the email domain); 特定商取引法 page before selling in Japan.
+2. DONE: consent + legal pages (privacy, data-protection/GDPR, terms, disclaimer) for **Lina & Daichi LLC**, contact
+   dvu@linadaichiagency.com, modelled on catchdiff.com. Still to do: paste Code.gs into Apps Script (New version);
+   特定商取引法 page before selling in Japan (needs address + phone); lawyer review before public launch.
 3. Confirm camera works on both test phones after resetting the permission.
 4. Fill poster placeholders ([NUMBER] families, QR) before printing.
 
