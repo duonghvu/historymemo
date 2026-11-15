@@ -108,6 +108,12 @@ test('book: transcripts + chronological order from roots/birth to today', () => 
   const order = ['Cội nguồn', 'Ra đời', 'Tuổi thơ'].map(h => md.indexOf('## ' + h));
   assert.match(md, /HistoryMemo là dịch vụ độc lập/);                         // AI disclaimer at the end of the book
   assert.ok(order[0] >= 0 && order[0] < order[1] && order[1] < order[2], md);
+  const data = call('bookData', { id: profile.id, lang: 'vi' });                // print-ready book: same order + chapters
+  assert.deepEqual(data.stages.map(x => x.id), ['roots', 'early', 'child']);
+  assert.equal(data.stories.length, 3);
+  assert.ok(data.stages.some(x => x.chapter), 'AI chapters are kept for the print book');
+  assert.ok(data.stories.every(x => x.url && x.meta), JSON.stringify(data.stories[0]));
+  assert.match(data.aiNote, /độc lập/);
   const sorted = g.ctx.sortStories_([
     { stage: 'now', phase: 'diary', seq: 0, date: '2027-01-02' },
     { stage: 'child', phase: 'timeline', seq: 3, date: '2026-12-01' },

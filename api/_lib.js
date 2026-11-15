@@ -10,7 +10,7 @@ for (const k of ['GAS_URL', 'GAS_SECRET', 'ADMIN_KEY', 'SESSION_SECRET', 'ADMIN_
 export const ADMIN_ACTIONS = new Set([
   'storytellers', 'createStoryteller', 'updateStoryteller',
   'questions', 'prompt', 'promptTicket', 'promptDone', 'testPush',
-  'generateNow', 'transcribeNow', 'buildBook', 'addQuestion', 'syncSheet', 'deleteStoryteller',
+  'generateNow', 'transcribeNow', 'buildBook', 'bookData', 'addQuestion', 'syncSheet', 'deleteStoryteller',
 ]);
 export const STORYTELLER_ACTIONS = new Set(['me', 'saveProfile', 'ticket', 'storyDone', 'subscribe', 'skip', 'rest', 'consent']);
 

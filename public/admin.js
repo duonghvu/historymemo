@@ -139,6 +139,7 @@ function card(st) {
             ${st.timeline && st.phase === 'life' ? ` · ${st.timeline} AI questions ready` : ''}</span>
           <div class="row">
             <button class="primary sm" data-do="buildBook" data-id="${st.id}">📖 Make book</button>
+            <a class="secondary sm button" href="/book.html?id=${encodeURIComponent(st.id)}${st.uiLang ? '&lang=' + st.uiLang : ''}" target="_blank" rel="noopener">🖨️ Print-ready book</a>
             ${flags.ai ? `<button class="secondary sm" data-do="buildBookAI" data-id="${st.id}">✍️ Book with AI-written chapters</button>
               ${st.timelineDone ? '' : `<button class="secondary sm" data-do="generateNow" data-id="${st.id}">⚡ Generate next AI questions</button>`}` : ''}
             ${flags.stt ? `<button class="secondary sm" data-do="transcribeNow" data-id="${st.id}">📝 Transcribe now</button>` : ''}

@@ -84,3 +84,9 @@ No secrets in this file. Keys and passwords live only in Vercel env vars and App
 - YouTube-style interview film (titles, subtitles from transcripts, chapters).
 - Batch the hourly job past ~60 storytellers (6-minute execution limit).
 - Re-enable CI (`ci/check.yml`) with a token that has the `workflow` scope.
+
+## 2026-11-15: digital only, print-ready book, sample books
+- Digital products only, sold through Lemon Squeezy (Merchant of Record). No printed books are sold; the digital book includes an A5 print-ready PDF the family prints themselves (Lulu, 製本直送.com, any local shop). Guide: /print.html.
+- /book.html renders the print-ready book (A5, chapters in life order, QR code per story). Real book: admin → 🖨️ Print-ready book (Apps Script action `bookData`; AI chapters are saved to `chapters.json` when "Book with AI-written chapters" runs). Samples (fictional families): /book.html?sample=en|vi|ja and /samples/book-*.pdf (rendered with headless Chrome from the mock server).
+- /tokushoho.html (特定商取引法) live. Flyers on the canvas reworked: printed-book cards → "print it yourself" with the PDF; JA flyer links the 特定商取引法 page.
+- Needs the new Code.gs in Apps Script (New version) for `bookData`.

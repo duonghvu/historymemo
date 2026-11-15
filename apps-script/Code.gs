@@ -110,7 +110,7 @@ function setup() {
 
 function doGet() { return json_({ ok: true, app: 'historymemo' }); }
 
-const READ_ONLY = { storytellers: 1, questions: 1, prompt: 1 };
+const READ_ONLY = { storytellers: 1, questions: 1, prompt: 1, bookData: 1 };
 
 function doPost(e) {
   let req;
@@ -383,13 +383,14 @@ const ADMIN = {
     body.appendParagraph(BOOK[ui].sub(stories.length));
     const write = req.write && prop_('ANTHROPIC_API_KEY');
     let chapters = 0;
+    const chaps = {};
     STAGES.forEach(stage => {
       const items = stories.filter(s => s.stage === stage);
       if (!items.length) return;
       body.appendParagraph(STAGE_NAME[stage][ui]).setHeading(H.HEADING1);
       const said = items.filter(s => s.transcript);
       if (write && said.length) {
-        try { body.appendParagraph(writeChapter_(st, stage, said, ui)); chapters++; } catch (err) { Logger.log(err); }
+        try { chaps[stage] = writeChapter_(st, stage, said, ui); body.appendParagraph(chaps[stage]); chapters++; } catch (err) { Logger.log(err); }
       }
       items.forEach(s => {
         body.appendParagraph(s.question[ui] || s.question.en).setHeading(s.sub ? H.HEADING3 : H.HEADING2);
@@ -401,12 +402,39 @@ const ADMIN = {
     });
     body.appendParagraph(AI_NOTE[ui]).setItalic(true);
     doc.saveAndClose();
+    if (chapters) {                       // kept so the print-ready book (bookData) has the same chapters
+      const saved = readJson_(st, 'chapters.json', {});
+      saved[ui] = chaps;
+      writeJson_(st, 'chapters.json', saved);
+    }
     const file = DriveApp.getFileById(doc.getId());
     file.moveTo(root_(st));
     if (st.bookDocId && st.bookDocId !== doc.getId()) { try { DriveApp.getFileById(st.bookDocId).setTrashed(true); } catch (err) {} }
     st.bookDocId = doc.getId();
     saveSt_(st);
     return { ok: true, url: file.getUrl(), stories: stories.length, chapters };
+  },
+
+  // Data for the print-ready book (public/book.html → browser "Save as PDF" → any print shop).
+  bookData(req) {
+    const st = getSt_(req.id);
+    if (!st) return { error: 'not found' };
+    const ui = UI_LANGS.indexOf(req.lang) >= 0 ? req.lang : (st.uiLang || 'en');
+    const stories = sortStories_(readJson_(st, 'stories.json', []).filter(s => !s.missing));
+    const chapters = readJson_(st, 'chapters.json', {})[ui] || {};
+    return {
+      ok: true, ui, title: BOOK[ui].title(st.name), sub: BOOK[ui].sub(stories.length),
+      stages: STAGES.filter(g => stories.some(s => s.stage === g))
+        .map(g => ({ id: g, name: STAGE_NAME[g][ui], chapter: chapters[g] || '' })),
+      stories: stories.map(s => ({
+        stage: s.stage, sub: !!s.sub,
+        question: s.question[ui] || s.question.en,
+        original: TEXT_LANGS.indexOf(s.lang) >= 0 && s.lang !== ui ? s.question[s.lang] : '',
+        meta: `${String(s.date).slice(0, 10)} · ${LANG_LABEL[s.lang]} · ${s.kind === 'video' ? T[ui].video : T[ui].voice} · ${mmss_(s.seconds)}`,
+        url: s.url, transcript: s.transcript || '',
+      })),
+      aiNote: AI_NOTE[ui],
+    };
   },
 
   testPush(req) {
