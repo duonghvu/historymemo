@@ -58,11 +58,18 @@ No secrets in this file. Keys and passwords live only in Vercel env vars and App
 - Optional: Apps Script `Code.gs` has the server-side "app language from story languages" change; paste + New version
   when convenient (the phone already handles it).
 
+### 2026-11-15 (later)
+- Japanese poster published; one-page flyers EN, VI (Letter) and JA (A4, tax-incl. yen prices: digital ¥9,800,
+  book set ¥19,800, extra copy ¥5,500, premium ¥39,800, mini ¥4,980, continue ¥980/mo; monitor price ¥12,800).
+- `043a387` privacy consent: ONE screen before the first recording (merged with the camera "tap Allow" hint), or none
+  if the family ticks consent on the admin page; `public/privacy.html` (en/vi/ja). Checked live in headless Chrome.
+  Apps Script needs the new `Code.gs` (+ New version) to store consent server-side; until then the phone keeps it.
+- Payments: Lemon Squeezy prohibits physical goods (printed book) → use Stripe (Payment Links) instead.
+
 ## Paused here (2026-11-15), to do next
 1. Publish the Japanese poster (`Poster-JA.dc.html`, already written in the session scratchpad; rewrite if gone).
-2. In-app privacy / GDPR consent: "I agree" before the first recording (store consent time + version), privacy
-   page in en/vi/ja (what is stored, Drive + OpenAI/Anthropic, download/delete on request, contact
-   dvu@linadaichiagency.com). Posters already promise this. Not legal advice: review before public launch.
+2. DONE: consent + privacy page. Still to do: paste Code.gs into Apps Script (New version); confirm the operator name
+   on privacy.html ("Lina Daichi Agency" was inferred from the email domain); 特定商取引法 page before selling in Japan.
 3. Confirm camera works on both test phones after resetting the permission.
 4. Fill poster placeholders ([NUMBER] families, QR) before printing.
 
