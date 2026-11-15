@@ -87,7 +87,7 @@ async function load() {
     </div>
     <p class="muted">Lina &amp; Daichi LLC · <a href="/privacy.html" target="_blank" rel="noopener">Privacy</a> ·
       <a href="/data-protection.html" target="_blank" rel="noopener">Data protection (GDPR)</a> ·
-      <a href="/terms.html" target="_blank" rel="noopener">Terms</a> · <a href="/disclaimer.html" target="_blank" rel="noopener">Disclaimer</a> ·
+      <a href="/terms.html" target="_blank" rel="noopener">Terms</a> · <a href="/disclaimer.html" target="_blank" rel="noopener">Disclaimer</a> · <a href="/tokushoho.html" target="_blank" rel="noopener">特定商取引法</a> ·
       dvu@linadaichiagency.com</p>`;
 
   root.querySelector('#out').onclick = () => { try { localStorage.removeItem('a'); } catch {} a = null; login(); };
