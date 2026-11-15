@@ -1159,6 +1159,8 @@ function applyAdminFields_(st, f) {
   if (f.callName) st.callName = String(f.callName).slice(0, 20);
   if (UI_LANGS.indexOf(f.uiLang) >= 0) st.uiLang = f.uiLang;
   if (Array.isArray(f.langs)) st.langs = f.langs.filter((l, i, a) => LANGS.indexOf(l) >= 0 && a.indexOf(l) === i);
+  // Languages chosen by the family → the app opens straight on the question (no language screen).
+  if (!st.uiLang && st.langs && st.langs.length) st.uiLang = st.langs.filter(l => UI_LANGS.indexOf(l) >= 0)[0] || 'vi';
   if (f.mode === 'daily' || f.mode === 'each') st.mode = f.mode;
   if (f.defaultKind === 'video' || f.defaultKind === 'audio') st.defaultKind = f.defaultKind;
   if (f.email !== undefined) st.email = String(f.email).trim().toLowerCase();

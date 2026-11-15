@@ -74,6 +74,7 @@ async function boot() {
 /** Only one setup step: the language. Pace, rotation and video/voice come from the family's admin page. */
 function next() {
   const p = S.profile;
+  if (p.langs && p.langs.length && !p.uiLang) return setLang(p.langs[0]);   // family chose: go straight in
   if (!p.uiLang || !p.langs || !p.langs.length) return pickUi();
   home();
 }
@@ -225,9 +226,15 @@ function home() {
   // A follow-up reminds them which story it continues; a family question says who asks.
   const context = p.src === 'followup' && p.about ? `<p class="hint">${tr('aboutPrev', { q: esc(p.about) })}</p>`
                 : p.src === 'family' && p.by && !p.reason ? `<p class="hint">${tr('askedBy', { by: esc(p.by) })}</p>` : '';
+  const langs = (S.profile.langs || []).length ? S.profile.langs : [L()];
   const big = p.spoken || p.display;
-  const sub = p.spoken && p.spoken !== p.display ? p.display : '';
-  const canListen = !!p.audio || !!TTS[p.lang];
+  // The question in the storyteller's other languages (and the app language), smaller, under the big one.
+  const others = [...new Set(langs.concat([L()]))]
+    .filter(l => l !== p.lang && p.text && p.text[l] && p.text[l] !== big)
+    .map(l => `<p class="translation" lang="${l}">${esc(p.text[l])}</p>`).join('');
+  const canHear = l => (l === p.lang && !!p.audio) || (!!TTS[l] && !!(p.text && p.text[l]));
+  const hearOther = langs.filter(l => l !== p.lang && canHear(l))
+    .map(l => `<button class="listen-btn alt" data-a="play" data-v="${l}">🔊 ${LANG_NATIVE[l]}</button>`).join('');
   const tip = isIOS && !standalone ? `<p class="hint small center-text">${tr('homeTip')}</p>` : '';
   render(`
     <header class="top">
@@ -235,9 +242,13 @@ function home() {
       <button class="link" data-a="settings">${tr('settings')}</button>
     </header>
     ${context}
+    ${langs.length > 1 ? `<p class="answer-in"><span>🗣</span> ${tr('answerIn', { lang: `<b>${LANG_NATIVE[p.lang]}</b>` })}</p>` : ''}
     <h1 class="question" lang="${p.spoken ? p.lang : L()}">${esc(big)}</h1>
-    ${sub ? `<p class="translation">${esc(sub)}</p>` : ''}
-    ${canListen ? `<div class="listen"><button class="listen-btn" data-a="play" data-v="${p.lang}">${tr('listen')}</button></div>` : ''}
+    ${others}
+    <div class="listen">
+      ${canHear(p.lang) ? `<button class="listen-btn" id="hear" data-a="play" data-v="${p.lang}">${tr('listenAgain')}</button>` : ''}
+      ${hearOther}
+    </div>
     <button class="primary huge" data-a="record" data-v="${kind}">
       <span class="emoji">${kind === 'video' ? '🎥' : '🎙️'}</span><span>${tr(kind === 'video' ? 'recordVideo' : 'recordAudio')}</span>
     </button>
@@ -246,6 +257,22 @@ function home() {
       <button class="link" data-a="skip">${tr('skip')}</button>
     </p>
     ${tip}`, 'home');
+  // Read the question aloud once when it appears; "Hear again" repeats it.
+  if (S.spokenFor !== p.id && canHear(p.lang)) { S.spokenFor = p.id; setTimeout(() => autoSpeak(p.lang), 400); }
+}
+
+/**
+ * Phones only allow sound after a tap. Right after a tap (Next question, Send, language) this plays;
+ * on a cold open it may be blocked — then the "Hear again" button pulses so they know to tap it.
+ */
+function autoSpeak(lang) {
+  if (!S.next || $('[data-screen]').dataset.screen !== 'home') return;
+  const started = play(lang);
+  const hint = () => { const b = $('#hear'); if (b) b.classList.add('pulse'); };
+  if (started && started.catch) return started.catch(hint);
+  setTimeout(() => {
+    if ('speechSynthesis' in window && !speechSynthesis.speaking && !speechSynthesis.pending) hint();
+  }, 1500);
 }
 
 let player;
@@ -256,7 +283,8 @@ function play(lang) {
   if (lang === p.lang && p.audio) {
     p.audioUrl = p.audioUrl || b64ToUrl(p.audio);
     player = new Audio(p.audioUrl);
-    return player.play().catch(console.warn);
+    const b = $('#hear'); if (b) b.classList.remove('pulse');
+    return player.play();
   }
   const text = p.text && p.text[lang];
   if (!text || !TTS[lang] || !('speechSynthesis' in window)) return;
@@ -265,7 +293,9 @@ function play(lang) {
   u.rate = 0.85;
   const v = speechSynthesis.getVoices().find(v => v.lang && v.lang.toLowerCase().startsWith(lang));
   if (v) u.voice = v;
+  u.onstart = () => { const b = $('#hear'); if (b) b.classList.remove('pulse'); };
   speechSynthesis.speak(u);
+  return null;
 }
 
 // ─────────────────────────── record ───────────────────────────
@@ -552,7 +582,7 @@ const actions = {
   setLang,
   enableNotify,
   settings: pickUi,
-  play,
+  play: v => { const r = play(v); if (r && r.catch) r.catch(console.warn); },
   record,
   stop,
   send,

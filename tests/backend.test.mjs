@@ -341,3 +341,13 @@ test('reminders follow the phone time zone: the phone sends it on every open, lo
   g.ctx.pushTo_ = realPush;
   call('deleteStoryteller', { id: made.id, trash: true });
 });
+
+test('family picks the languages → app language is set too, so the phone skips the language screen', () => {
+  const a = call('createStoryteller', { fields: { name: 'EnVi', langs: ['en', 'vi'] } });
+  assert.equal(g.ctx.getSt_(a.id).uiLang, 'en');
+  const b = call('createStoryteller', { fields: { name: 'Teo', langs: ['teo'] } });
+  assert.equal(g.ctx.getSt_(b.id).uiLang, 'vi');                                   // Teochew → Vietnamese screens
+  const c = call('createStoryteller', { fields: { name: 'Pick' } });
+  assert.equal(g.ctx.getSt_(c.id).uiLang, '');                                      // nothing chosen → they pick
+  for (const x of [a, b, c]) call('deleteStoryteller', { id: x.id, trash: true });
+});

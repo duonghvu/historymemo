@@ -170,7 +170,7 @@ function form(st, id) {
       </div>
       <div class="row">
         <label>App language<select name="uiLang">${['', 'en', 'vi', 'ja'].map(l =>
-          `<option value="${l}" ${st.uiLang === l ? 'selected' : ''}>${l ? LANG_NATIVE[l] : 'Let them choose'}</option>`).join('')}</select></label>
+          `<option value="${l}" ${st.uiLang === l ? 'selected' : ''}>${l ? LANG_NATIVE[l] : 'Same as first story language'}</option>`).join('')}</select></label>
         <label>Language rotation<select name="mode">
           <option value="daily" ${st.mode !== 'each' ? 'selected' : ''}>One language per day</option>
           <option value="each" ${st.mode === 'each' ? 'selected' : ''}>Switch with every question</option></select></label>
