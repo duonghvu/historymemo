@@ -84,7 +84,11 @@ async function load() {
       <div class="row">Also show AI timeline questions for:
         <select id="pfor"><option value="">(none)</option>${list.map(st => `<option value="${st.id}" ${st.id === promptFor ? 'selected' : ''}>${esc(st.name)} (${st.timeline})</option>`).join('')}</select></div>
       <div id="qs">${questions(q.list)}</div>
-    </div>`;
+    </div>
+    <p class="muted">Lina &amp; Daichi LLC · <a href="/privacy.html" target="_blank" rel="noopener">Privacy</a> ·
+      <a href="/data-protection.html" target="_blank" rel="noopener">Data protection (GDPR)</a> ·
+      <a href="/terms.html" target="_blank" rel="noopener">Terms</a> · <a href="/disclaimer.html" target="_blank" rel="noopener">Disclaimer</a> ·
+      dvu@linadaichiagency.com</p>`;
 
   root.querySelector('#out').onclick = () => { try { localStorage.removeItem('a'); } catch {} a = null; login(); };
   root.querySelectorAll('[name=pl]').forEach(r => (r.onchange = () => { promptLang = r.value; load(); }));

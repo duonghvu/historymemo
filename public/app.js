@@ -97,6 +97,7 @@ function welcome() {
       <div id="gsi"></div>
       ${S.config.mock ? `<button class="primary" data-a="demoLogin">▶ Local demo</button>` : ''}
       <p class="hint small">${tr('linkHint')}</p>
+      <p class="hint small"><a href="/privacy.html" target="_blank" rel="noopener">Privacy</a> · <a href="/terms.html" target="_blank" rel="noopener">Terms</a> · <a href="/disclaimer.html" target="_blank" rel="noopener">Disclaimer</a></p>
     </div>`, 'welcome');
   if (S.config.googleClientId) loadGoogle();
 }
