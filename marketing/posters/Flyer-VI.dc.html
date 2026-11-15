@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>HistoryMemo, tờ rơi tiếng Việt</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&amp;family=Noto+Serif:wght@600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#b3261e}a:hover{color:#7f1b15}
+.ico{width:40px;height:40px;border-radius:50%;background:#b3261e;color:#fff;display:flex;align-items:center;justify-content:center;flex:none}
+.card{background:#fff;border:1px solid #e3d5bd;border-radius:18px;padding:16px 18px;display:flex;flex-direction:column;gap:7px}
+.li{display:flex;gap:8px;align-items:flex-start;font-size:14px;line-height:1.4}
+.tick{color:#b3261e;flex:none;margin-top:2px}
+.qa b{display:block;font-size:14px;margin-bottom:3px}
+.qa span{font-size:13.5px;line-height:1.4;color:#5c4f45}
+</style>
+</helmet>
+<div style="width: 816px; height: 1056px; box-sizing: border-box; padding: 50px 56px 24px; background: #fbf6ee; color: #2a211b; font-family: 'Be Vietnam Pro', sans-serif; display: flex; flex-direction: column; overflow: hidden">
+
+  <div style="display: flex; align-items: center; justify-content: space-between; height: 40px">
+    <div style="display: flex; align-items: center; gap: 10px">
+      <div style="width: 38px; height: 38px; border-radius: 50%; background: #b3261e; color: #fff; display: flex; align-items: center; justify-content: center">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3z"></path><path d="M19 11a7 7 0 0 1-14 0"></path><path d="M12 18v3"></path></svg>
+      </div>
+      <span style="font-family: 'Noto Serif', serif; font-weight: 700; font-size: 24px">HistoryMemo</span>
+    </div>
+    <span style="background: #2a211b; color: #fbf6ee; border-radius: 99px; padding: 8px 16px; font-weight: 600; font-size: 14px">Dùng thử miễn phí</span>
+  </div>
+
+  <h1 style="margin: 20px 0 0; font-family: 'Noto Serif', serif; font-weight: 700; font-size: 40px; line-height: 1.15; color: #b3261e; text-wrap: balance">Biến chuyện đời ông bà thành cuốn sách gia đình</h1>
+  <p style="margin: 10px 0 0; font-size: 16px; line-height: 1.5">Mỗi ngày HistoryMemo hỏi một câu nhẹ nhàng bằng tiếng Việt, tiếng Tiều, tiếng Anh hoặc tiếng Nhật. Ông bà trả lời bằng video hoặc giọng nói. Sau 56 câu hỏi, cả nhà có câu chuyện cuộc đời ông bà, bằng chính lời ông bà.</p>
+
+  <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; margin-top: 20px">
+    <div style="display: flex; gap: 12px; align-items: flex-start">
+      <div class="ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z"></path><path d="M15.5 8.5a5 5 0 0 1 0 7"></path><path d="M18.5 5.5a9 9 0 0 1 0 13"></path></svg></div>
+      <div><b style="display: block; font-size: 15.5px">1. Mỗi ngày một câu</b><span style="font-size: 13.5px; line-height: 1.4; color: #5c4f45">Đọc to bằng tiếng của ông bà. Bấm để nghe lại.</span></div>
+    </div>
+    <div style="display: flex; gap: 12px; align-items: flex-start">
+      <div class="ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="6" width="14" height="12" rx="2"></rect><path d="m16 10 6-3v10l-6-3z"></path></svg></div>
+      <div><b style="display: block; font-size: 15.5px">2. Bấm quay</b><span style="font-size: 13.5px; line-height: 1.4; color: #5c4f45">3, 2, 1… video hoặc ghi âm, một hai phút.</span></div>
+    </div>
+    <div style="display: flex; gap: 12px; align-items: flex-start">
+      <div class="ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 4h7a3 3 0 0 1 3 3v13a2 2 0 0 0-2-2H2z"></path><path d="M22 4h-7a3 3 0 0 0-3 3v13a2 2 0 0 1 2-2h8z"></path></svg></div>
+      <div><b style="display: block; font-size: 15.5px">3. Sau 56 câu chuyện</b><span style="font-size: 13.5px; line-height: 1.4; color: #5c4f45">Chuyện đời theo thứ tự, bằng lời của ông bà.</span></div>
+    </div>
+  </div>
+
+  <h2 style="margin: 22px 0 10px; font-family: 'Noto Serif', serif; font-size: 21px">Gia đình nhận được</h2>
+  <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px">
+    <div class="card">
+      <div style="display: flex; justify-content: space-between; align-items: baseline"><b style="font-size: 18px">Sách điện tử</b><b style="font-size: 18px; color: #b3261e">[GIÁ]</b></div>
+      <div class="li"><svg class="tick" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 5 5 9-10"></path></svg><span>Đủ 56 câu chuyện, chép lại thành chữ</span></div>
+      <div class="li"><svg class="tick" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 5 5 9-10"></path></svg><span>Các chương ngắn theo dòng đời, viết từ chính lời kể</span></div>
+      <div class="li"><svg class="tick" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 5 5 9-10"></path></svg><span>Mọi video và ghi âm, bấm là xem, là nghe</span></div>
+      <div class="li"><svg class="tick" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 5 5 9-10"></path></svg><span>Bản PDF để chia sẻ, kèm phim gia đình</span></div>
+    </div>
+    <div class="card" style="border: 2px solid #b3261e">
+      <div style="display: flex; justify-content: space-between; align-items: baseline"><b style="font-size: 18px">Sách in bìa cứng</b><b style="font-size: 18px; color: #b3261e">[GIÁ]</b></div>
+      <div class="li"><svg class="tick" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 5 5 9-10"></path></svg><span>Mọi thứ trong sách điện tử</span></div>
+      <div class="li"><svg class="tick" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 5 5 9-10"></path></svg><span>In màu, bìa cứng, để giữ lâu dài</span></div>
+      <div class="li"><svg class="tick" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 5 5 9-10"></path></svg><span>Mã QR ở mỗi câu chuyện phát giọng ông bà</span></div>
+      <div class="li"><svg class="tick" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 5 5 9-10"></path></svg><span>Thêm bản cho con cháu: [GIÁ] mỗi cuốn</span></div>
+    </div>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; margin-top: 18px">
+    <div class="qa"><b>Ông bà có cần email hay cài app?</b><span>Không. Chỉ cần đường link riêng trên iPhone hoặc Android.</span></div>
+    <div class="qa"><b>Ai xem được câu chuyện?</b><span>Chỉ những người thân bạn chọn.</span></div>
+    <div class="qa"><b>Lỡ bỏ một ngày thì sao?</b><span>Không sao. Câu hỏi chờ ông bà, nhắc nhở nhẹ nhàng.</span></div>
+  </div>
+
+  <div style="margin-top: 18px; background: #b3261e; color: #fff; border-radius: 20px; padding: 16px 22px; display: flex; align-items: center; gap: 20px; height: 104px; box-sizing: border-box">
+    <div style="flex: 1; display: flex; flex-direction: column; gap: 4px">
+      <span style="font-weight: 700; font-size: 18.5px; line-height: 1.3">Dùng thử miễn phí: ghi lại câu chuyện không mất tiền. Cuối cùng mới chọn sách, nếu muốn.</span>
+      <span style="font-weight: 600; font-size: 15px">Đăng ký: dvu@linadaichiagency.com</span>
+    </div>
+    <div style="width: 76px; height: 76px; border: 2px dashed #fbf6ee; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; flex: none">[QR]</div>
+  </div>
+
+  <p style="margin: 11px 0 0; border-top: 1px solid #d9cbb3; padding-top: 8px; font-size: 12px; line-height: 1.42; color: #5c4f45"><b>Quyền riêng tư và điều khoản.</b> Câu chuyện được lưu riêng trong thư mục Google Drive chỉ chia sẻ với người thân bạn chọn. Dịch vụ AI (OpenAI, Anthropic) chép lời, gợi ý câu hỏi và giúp viết các chương. Bạn có thể tải về hoặc xóa tất cả bất cứ lúc nào. Khi tham gia, bạn đồng ý với điều khoản dùng thử và chính sách quyền riêng tư (GDPR) trong ứng dụng. Giá và nội dung sách có thể thay đổi sau thời gian dùng thử. Thắc mắc: dvu@linadaichiagency.com</p>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":816,"height":1056}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>
