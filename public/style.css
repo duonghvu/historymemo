@@ -111,3 +111,9 @@ button[disabled] { opacity: .4; }
 /* "Hear again" pulses when the phone blocked the automatic reading */
 @keyframes hm-pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(179, 38, 30, .45); } 50% { box-shadow: 0 0 0 12px rgba(179, 38, 30, 0); } }
 .listen-btn.pulse { animation: hm-pulse 1.4s ease-in-out infinite; outline: 2px solid var(--red); }
+
+/* primer: a picture of the phone's own pop-up, showing which button to tap */
+.fake-prompt { background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 14px 16px 0; font-size: 18px; text-align: center; width: 100%; max-width: 340px; box-shadow: 0 6px 20px rgba(0,0,0,.08); }
+.fake-prompt div { display: flex; margin-top: 12px; border-top: 1px solid var(--line); }
+.fake-prompt span, .fake-prompt b { flex: 1; padding: 12px 0; color: #2a6fdb; }
+.fake-prompt b { border-left: 1px solid var(--line); outline: 3px solid var(--red); outline-offset: -3px; border-radius: 0 0 14px 0; }

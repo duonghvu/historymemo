@@ -312,6 +312,11 @@ async function record(kind) {
   S.stage = null;
   const run = S.run = {};                                       // this attempt (Retake / Cancel start a new one)
   if (inAppBrowser() || !(navigator.mediaDevices && navigator.mediaDevices.getUserMedia)) return mediaHelp(kind, 'inApp');
+  // Before the phone's own pop-up: blocked already → straight to the fix; never asked → explain "tap Allow" once.
+  const state = await permState(kind);
+  if (S.run !== run) return;
+  if (state === 'denied') { S.mediaErr = 'blocked before asking'; return mediaHelp(kind, 'denied'); }
+  if (state !== 'granted' && !primed()) return primer(kind);
   const p = S.next;
   render(`
     <div class="center">
@@ -353,6 +358,29 @@ async function record(kind) {
     if (el) el.textContent = fmt(s);
     if (s >= S.maxSeconds) stop();
   }, 250);
+}
+
+/** 'granted' | 'denied' | 'prompt' | 'unknown' for what this recording needs (camera only matters for video). */
+async function permState(kind) {
+  try {
+    const names = kind === 'video' ? ['camera', 'microphone'] : ['microphone'];
+    const st = await Promise.all(names.map(n => navigator.permissions.query({ name: n }).then(r => r.state)));
+    if (st.includes('denied')) return 'denied';
+    return st.every(x => x === 'granted') ? 'granted' : 'prompt';
+  } catch { return 'unknown'; }                                 // older iPhones can't tell: show the primer once
+}
+const primed = () => { try { return localStorage.getItem('camPrimed') === '1'; } catch { return false; } };
+
+function primer(kind) {
+  render(`
+    <div class="center">
+      <p class="big">${kind === 'video' ? '📷🎙️' : '🎙️'}</p>
+      <h1>${tr(kind === 'video' ? 'primerTitle' : 'primerTitleMic')}</h1>
+      <p class="lead">${tr('primerLead')}</p>
+      <div class="fake-prompt">${tr('primerFake')}<div><span>${tr('primerDont')}</span><b>${tr('primerAllow')}</b></div></div>
+      <button class="primary huge" data-a="primed" data-v="${kind}"><span>${tr('primerGo')}</span></button>
+      <button class="ghost" data-a="home">${tr('home')}</button>
+    </div>`, 'primer');
 }
 
 function cancelRec() {
@@ -594,6 +622,7 @@ const actions = {
   anotherQ: () => { S.extra = true; home(); },
   redo: () => record(S.kind),
   cancelRec,
+  primed: v => { try { localStorage.setItem('camPrimed', '1'); } catch {} record(v); },   // this tap → the phone's pop-up
   oneMore: () => { S.extra = true; home(); },
 };
 
