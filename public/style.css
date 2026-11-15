@@ -117,3 +117,9 @@ button[disabled] { opacity: .4; }
 .fake-prompt div { display: flex; margin-top: 12px; border-top: 1px solid var(--line); }
 .fake-prompt span, .fake-prompt b { flex: 1; padding: 12px 0; color: #2a6fdb; }
 .fake-prompt b { border-left: 1px solid var(--line); outline: 3px solid var(--red); outline-offset: -3px; border-radius: 0 0 14px 0; }
+
+/* consent: three short promises, readable at a glance */
+.consent { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px; text-align: left; width: 100%; }
+.consent li { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 12px 14px 12px 44px; position: relative; font-size: 19px; line-height: 1.4; }
+.consent li::before { content: '✓'; position: absolute; left: 14px; top: 11px; color: var(--red); font-weight: 800; }
+.small-link { color: var(--muted); font-size: 17px; text-decoration: underline; min-height: 44px; display: inline-flex; align-items: center; }

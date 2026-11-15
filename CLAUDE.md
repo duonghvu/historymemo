@@ -29,6 +29,9 @@ Stories are stored in Google Drive organised by user. Users are seniors: big typ
     = permission prompt, then 3-2-1 countdown, then `Recorder.begin()`) → `stop` (review: Send / Retake) → `send` →
     `thanks` (offers 🔔 reminders once). Pace, language rotation and video/voice are set on the admin page, not here.
     Camera problems go to `mediaHelp` (in-app browser / denied / busy / no camera). Clicks route via `data-a` → `actions`.
+    Privacy: before the first recording ONE `consentScreen` (merged with the "tap Allow" camera hint) → `consent` action
+    stores `st.consent {at, v, by}`; skipped when the family ticked consent on the admin page. `PRIVACY_V` in app.js must
+    equal `CONFIG.PRIVACY_VERSION`; bumping it asks everyone again. Notice text: `public/privacy.html` (en/vi/ja).
   - `i18n.js`: UI strings `STR.en|vi|ja`, `t(lang, key, vars)`. Teochew has no written UI.
   - `common.js`: `api()`, `Recorder` (`open()` = getUserMedia + preview, `begin()` = MediaRecorder; iOS → mp4), `uploadToDrive()` (Drive v3 resumable; `ticket.uploadUrl` overrides for mock).
   - `admin.html/js`: storytellers CRUD, private link + QR, test push, record question voices per language.

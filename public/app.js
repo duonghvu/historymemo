@@ -316,6 +316,7 @@ async function record(kind) {
   const state = await permState(kind);
   if (S.run !== run) return;
   if (state === 'denied') { S.mediaErr = 'blocked before asking'; return mediaHelp(kind, 'denied'); }
+  if (!consented()) return consentScreen(kind, state !== 'granted');   // once; also explains the camera pop-up
   if (state !== 'granted' && !primed()) return primer(kind);
   const p = S.next;
   render(`
@@ -370,6 +371,37 @@ async function permState(kind) {
   } catch { return 'unknown'; }                                 // older iPhones can't tell: show the primer once
 }
 const primed = () => { try { return localStorage.getItem('camPrimed') === '1'; } catch { return false; } };
+
+// ── privacy consent: ONE screen before the very first recording (or none, if the family agreed on the admin page) ──
+const PRIVACY_V = '2026-11-15';                                 // = CONFIG.PRIVACY_VERSION in Code.gs
+function consented() {
+  if (S.profile && S.profile.consent) return true;
+  try { return localStorage.getItem('consent') === PRIVACY_V; } catch { return false; }
+}
+
+function consentScreen(kind, explainPopup) {
+  render(`
+    <div class="center">
+      <p class="big">🤝</p>
+      <h1>${tr('consentTitle')}</h1>
+      <ul class="consent">${tr('consentPoints').map(x => `<li>${x}</li>`).join('')}</ul>
+      <a class="small-link" href="/privacy.html#${L()}" target="_blank" rel="noopener">${tr('consentMore')}</a>
+      ${explainPopup ? `<p class="hint">${tr(kind === 'video' ? 'consentPopup' : 'consentPopupMic')}</p>
+        <div class="fake-prompt">${tr('primerFake')}<div><span>${tr('primerDont')}</span><b>${tr('primerAllow')}</b></div></div>` : ''}
+      <button class="primary huge" data-a="agree" data-v="${kind}"><span class="emoji">✅</span><span>${tr('consentAgree')}</span></button>
+      <button class="ghost" data-a="home">${tr('home')}</button>
+    </div>`, 'consent');
+}
+
+async function agree(kind) {
+  const b = document.querySelector('[data-a="agree"]');
+  if (b) b.disabled = true;
+  try { await api('consent', { lang: L(), v: PRIVACY_V }, k); }
+  catch (err) { console.warn('consent kept on this phone only', err); }   // never block the story over this
+  if (S.profile) S.profile.consent = true;
+  try { localStorage.setItem('consent', PRIVACY_V); localStorage.setItem('camPrimed', '1'); } catch {}
+  record(kind);                                                 // the same tap opens the phone's camera pop-up
+}
 
 function primer(kind) {
   render(`
@@ -622,6 +654,7 @@ const actions = {
   anotherQ: () => { S.extra = true; home(); },
   redo: () => record(S.kind),
   cancelRec,
+  agree,
   primed: v => { try { localStorage.setItem('camPrimed', '1'); } catch {} record(v); },   // this tap → the phone's pop-up
   oneMore: () => { S.extra = true; home(); },
 };

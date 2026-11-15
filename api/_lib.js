@@ -12,7 +12,7 @@ export const ADMIN_ACTIONS = new Set([
   'questions', 'prompt', 'promptTicket', 'promptDone', 'testPush',
   'generateNow', 'transcribeNow', 'buildBook', 'addQuestion', 'syncSheet', 'deleteStoryteller',
 ]);
-export const STORYTELLER_ACTIONS = new Set(['me', 'saveProfile', 'ticket', 'storyDone', 'subscribe', 'skip', 'rest']);
+export const STORYTELLER_ACTIONS = new Set(['me', 'saveProfile', 'ticket', 'storyDone', 'subscribe', 'skip', 'rest', 'consent']);
 
 /** Call the Google Apps Script backend server-to-server. GAS_SECRET never reaches a browser. */
 export async function gas(action, payload = {}) {

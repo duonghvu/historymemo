@@ -351,3 +351,19 @@ test('family picks the languages → app language is set too, so the phone skips
   assert.equal(g.ctx.getSt_(c.id).uiLang, '');                                      // nothing chosen → they pick
   for (const x of [a, b, c]) call('deleteStoryteller', { id: x.id, trash: true });
 });
+
+test('privacy consent: given on the phone or by the family; recorded with version; current version only', () => {
+  const a = call('createStoryteller', { fields: { name: 'C1', langs: ['vi'] } });
+  const key = g.ctx.getSt_(a.id).key;
+  assert.equal(call('me', { key }).profile.consent, false);
+  assert.equal(call('consent', { key, lang: 'vi' }).ok, true);
+  const st = g.ctx.getSt_(a.id);
+  assert.equal(st.consent.by, 'storyteller'); assert.equal(st.consent.lang, 'vi');
+  assert.equal(call('me', { key }).profile.consent, true);
+  const b = call('createStoryteller', { fields: { name: 'C2', langs: ['en'], consentFamily: 'on' } });
+  assert.equal(g.ctx.getSt_(b.id).consent.by, 'family');
+  assert.match(call('storytellers').list.find(s => s.id === b.id).consentAt, /\(family\)$/);
+  const old = g.ctx.getSt_(b.id); old.consent.v = '2000-01-01'; g.ctx.saveSt_(old);          // notice changed → ask again
+  assert.equal(call('me', { key: old.key }).profile.consent, false);
+  for (const x of [a, b]) call('deleteStoryteller', { id: x.id, trash: true });
+});

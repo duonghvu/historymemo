@@ -34,7 +34,8 @@ const CONFIG = {
   FOLLOWUPS_PER_DAY: 1,    // they take the place of a normal question, never an extra one
   PAUSE_AFTER_SKIPS: 2,    // this many skips in a row → no follow-ups for PAUSE_DAYS
   PAUSE_DAYS: 3,
-  LOST_AFTER_DAYS: 7,      // an upload the phone never finished → marked lost (the question is asked again)
+  LOST_AFTER_DAYS: 7,
+  PRIVACY_VERSION: '2026-11-15', // public/privacy.html; bump when it changes (people are asked again)      // an upload the phone never finished → marked lost (the question is asked again)
 };
 
 const LANGS = ['en', 'vi', 'ja', 'teo'];
@@ -217,6 +218,14 @@ const FATHER = {
     return { ok: true, next: withAudio_(currentPrompt_(st, ensureTimeline_(st))), doneToday: doneToday_(st) };
   },
 
+  // Privacy consent (GDPR / APPI): the storyteller tapped "I agree" on the phone. Recorded once per version.
+  consent(st, req) {
+    st.consent = { at: new Date().toISOString(), v: CONFIG.PRIVACY_VERSION, by: 'storyteller',
+                   lang: LANGS.indexOf(req.lang) >= 0 ? req.lang : (st.uiLang || '') };
+    saveSt_(st);
+    return { ok: true, consent: true };
+  },
+
   // "That's enough for today": no more questions or reminders until tomorrow.
   rest(st) {
     st.restDay = localDate_(st);
@@ -248,6 +257,7 @@ const ADMIN = {
           phase: promptAt_(st, st.progress || 0, plan).phase,
           queued: plan.queue.length, skipped: plan.skipped.length,
           followUps: st.followUps !== false, followPause: st.followPause || '',
+          consentAt: hasConsent_(st) ? st.consent.at.slice(0, 10) + ' (' + st.consent.by + ')' : '',
           sheetUrl: st.sheetId ? DriveApp.getFileById(st.sheetId).getUrl() : '',
           bookUrl: st.bookDocId ? DriveApp.getFileById(st.bookDocId).getUrl() : '' };
       }),
@@ -1151,7 +1161,7 @@ function publicProfile_(st) {
   return { id: st.id, name: st.name, callName: st.callName, email: st.email || '', uiLang: st.uiLang,
            langs: st.langs || [], mode: st.mode, perDay: st.perDay, hours: st.hours, tz: st.tz,
            start: st.start, defaultKind: st.defaultKind || 'video', progress: st.progress || 0, tzSource: st.tzSource || 'admin',
-           extraDone: st.extraDone || 0 };
+           extraDone: st.extraDone || 0, consent: hasConsent_(st) };
 }
 
 function applyAdminFields_(st, f) {
@@ -1172,6 +1182,10 @@ function applyAdminFields_(st, f) {
   if (!st.hours || st.hours.length < st.perDay) st.hours = DEFAULT_HOURS[st.perDay].slice();
   if (f.tz && validTz_(String(f.tz).trim())) st.tz = String(f.tz).trim();
   if (f.followUps !== undefined) st.followUps = f.followUps === true || f.followUps === 'on';
+  // The family explained the privacy notice and the storyteller agreed: the phone then skips the consent screen.
+  if ((f.consentFamily === true || f.consentFamily === 'on') && !hasConsent_(st)) {
+    st.consent = { at: new Date().toISOString(), v: CONFIG.PRIVACY_VERSION, by: 'family' };
+  }
   if (f.family !== undefined) {
     st.family = String(f.family).split(/[,\s;]+/).filter(e => /@/.test(e));
     st.family.forEach(email => {
@@ -1184,6 +1198,9 @@ function applyAdminFields_(st, f) {
 
 /** "Asia/Ho_Chi_Minh", "America/Chicago", "UTC". Java silently turns unknown names (e.g. "Central US") into GMT. */
 function validTz_(tz) { return /^(UTC|GMT|[A-Za-z]+(\/[A-Za-z0-9_+-]+)+)$/.test(tz); }
+
+/** Consent for the current privacy version (given on the phone, or by the family on the admin page). */
+function hasConsent_(st) { return !!(st.consent && st.consent.v === CONFIG.PRIVACY_VERSION); }
 
 function rand_() { return Utilities.getUuid().replace(/-/g, '').slice(0, 8); }
 function addDays_(st, days) {

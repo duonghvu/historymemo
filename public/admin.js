@@ -193,6 +193,11 @@ function form(st, id) {
         <label class="inline"><input type="checkbox" name="followUps" value="on" ${st.followUps !== false ? 'checked' : ''}>
           AI follow-up questions (gentle "tell me more", at most 1 a day, pauses when they skip)</label>
       </div>
+      <div class="row">
+        ${st.consentAt ? `<span class="pill ok">✓ Privacy consent ${esc(st.consentAt)}</span>`
+          : `<label class="inline"><input type="checkbox" name="consentFamily" value="on">
+          We explained the <a href="/privacy.html" target="_blank" rel="noopener">privacy notice</a> and they agreed (the phone then skips the consent screen)</label>`}
+      </div>
       <div class="row"><button class="primary sm" type="submit">${id === 'new' ? 'Create storyteller' : 'Save'}</button>
         ${id === 'new' ? '<span class="muted">Creating takes about 20 seconds (folder, story index, question Sheet).</span>'
           : `<button class="secondary sm" type="button" data-del="${esc(id)}" data-name="${esc(st.name)}">🗑 Delete storyteller</button>`}</div>
