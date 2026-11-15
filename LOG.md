@@ -38,6 +38,34 @@ No secrets in this file. Keys and passwords live only in Vercel env vars and App
 - Cleanup: deleted duplicate Hoang Vu `se80d4e82` and test storyteller `s1c47b896` (folders in Shared Drive trash).
 - VAPID keys added to Vercel → reminders possible once the iPhone turns them on.
 
+### 2026-11-15
+- `7c1a8df` camera/mic help screen (in-app browser / denied / busy / no camera) instead of one error line.
+- `a00dbe2` simpler storyteller flow: language (one tap, skipped if admin set it) → question → Record →
+  camera opens → 3-2-1 → recording → Send / Retake. Pace, rotation, video/voice now only on the admin page;
+  "when did this happen" chips removed; reminders offered after the first story.
+- `81c15b7` Android Chrome + app permission steps; grey diagnostic line on the help screen; recordings stopped
+  within ~1 s are empty → "too short, try again".
+- `e8115d7` languages chosen on the admin page load directly (server and phone); question shown in each of the
+  storyteller's languages; read aloud automatically, big "Hear again" (pulses if the phone blocked sound).
+- `d23e4b2` one-time "tap Allow" screen before the phone's camera pop-up; already blocked → straight to the fix.
+- Checked live in headless Chrome (test storytellers created and deleted): countdown + recording work
+  (5 s ≈ 276 KB), denied permission shows the help screen, admin languages skip the picker.
+- Both test phones (iPhone + Android, opened from the Home Screen icon) said "blocked" without asking:
+  a saved "Don't allow" on the phone. Fix is in phone settings (steps on the help screen). Not yet confirmed fixed.
+- Trial posters (US Letter, cream/red app colours, sample app screens, privacy/GDPR footer, contact
+  dvu@linadaichiagency.com): https://claude.ai/artifact/G3orczVQJTPaMtdz9crLZr (private until shared).
+  Trilingual, English, Vietnamese published; Japanese written but NOT yet published.
+- Optional: Apps Script `Code.gs` has the server-side "app language from story languages" change; paste + New version
+  when convenient (the phone already handles it).
+
+## Paused here (2026-11-15), to do next
+1. Publish the Japanese poster (`Poster-JA.dc.html`, already written in the session scratchpad; rewrite if gone).
+2. In-app privacy / GDPR consent: "I agree" before the first recording (store consent time + version), privacy
+   page in en/vi/ja (what is stored, Drive + OpenAI/Anthropic, download/delete on request, contact
+   dvu@linadaichiagency.com). Posters already promise this. Not legal advice: review before public launch.
+3. Confirm camera works on both test phones after resetting the permission.
+4. Fill poster placeholders ([NUMBER] families, QR) before printing.
+
 ## Not yet verified live
 - iPhone: recording, saving on the phone, resumable upload to Drive (can Safari read Drive's `Range` header?).
 - Real Google Sheet sync, folder/Sheet sharing to the family member inside the Shared Drive (needs external sharing allowed).
