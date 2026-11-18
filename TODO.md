@@ -5,9 +5,11 @@ Order: **free trial first**, payments later. Don't start Lemon Squeezy until peo
 ## Phase 1: Free Mini trial (now)
 
 ### 1. Turn on sign-ups (you, about 5 minutes)
-- [ ] Open the Apps Script project → replace `Code.gs` with `apps-script/Code.gs` from this repo → Save.
+- [x] (done 2026-11-18) Open the Apps Script project → replace `Code.gs` with `apps-script/Code.gs` from this repo → Save.
 - [ ] Deploy → **Manage deployments** → ✏️ (edit) → Version: **New version** → Deploy.
       (Don't use "New deployment": that changes the URL.)
+      Checked live 2026-11-18: a sign-up returns a private link; a second sign-up with the same email is refused.
+- [ ] Delete the test storyteller "ZZ Test (delete me)" on the admin page (trash its folder) and its row in the sign-up sheet.
 - [ ] Only if the URL changed (you made a New deployment by mistake): copy the new Web app URL (ends in `/exec`) →
       Vercel → historymemo → Settings → Environment Variables → `GAS_URL` → Edit → paste → Save →
       Deployments → ⋯ on the latest → **Redeploy**.
