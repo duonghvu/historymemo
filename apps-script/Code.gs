@@ -437,6 +437,13 @@ const ADMIN = {
     };
   },
 
+  // Flyer sign-ups: how many, and a link to the sheet.
+  signups() {
+    const sh = joinSheet_();
+    const rows = sh.getDataRange().getValues().filter(row => row.some(v => v !== ''));
+    return { ok: true, count: Math.max(0, rows.length - 1), url: SpreadsheetApp.openById(prop_('JOIN_SHEET_ID')).getUrl() };
+  },
+
   testPush(req) {
     const st = getSt_(req.id);
     if (!st) return { error: 'not found' };
@@ -446,6 +453,16 @@ const ADMIN = {
 
 // Actions only the Vercel server calls itself (never proxied from a browser)
 const SERVER = {
+  // Someone filled in join.html (from the flyer QR). Already validated by api/join.js.
+  joinInterest(req) {
+    const s = (v, n) => String(v == null ? '' : v).trim().slice(0, n).replace(/^[=+\-@]/, "'$&");  // no formulas in the sheet
+    const email = s(req.email, 120);
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || req.consent !== true) return { error: 'invalid' };
+    joinSheet_().appendRow([new Date().toISOString(), s(req.name, 80), email, s(req.phone, 40), s(req.lang, 5), s(req.who, 40),
+      s(req.langs, 80), s(req.country, 60), s(req.buy, 20), s(req.src, 40), s(req.note, 500), 'yes (' + CONFIG.PRIVACY_VERSION + ')']);
+    return { ok: true };
+  },
+
   // "Sign in with Google": the server has already verified the Google ID token.
   loginGoogle(req) {
     const email = String(req.email || '').toLowerCase();
@@ -455,6 +472,24 @@ const SERVER = {
     return { key: st.key, profile: publicProfile_(st) };
   },
 };
+
+// ───────────────────────── flyer sign-ups ─────────────────────────
+
+const JOIN_HEAD = ['Date', 'Name', 'Email', 'Phone / LINE', 'Page language', 'Storyteller', 'Their languages', 'Country',
+                   'Would buy the book?', 'Flyer / source', 'Note', 'Agreed to be contacted'];
+
+/** "HistoryMemo – trial sign-ups" sheet in the HistoryMemo folder (created on first use). */
+function joinSheet_() {
+  const id = prop_('JOIN_SHEET_ID');
+  if (id) { try { return SpreadsheetApp.openById(id).getSheets()[0]; } catch (err) { Logger.log('sign-up sheet missing: ' + err); } }
+  const ss = SpreadsheetApp.create('HistoryMemo – trial sign-ups');
+  const sh = ss.getSheets()[0];
+  sh.getRange(1, 1, 1, JOIN_HEAD.length).setValues([JOIN_HEAD]);
+  sh.setFrozenRows(1);
+  DriveApp.getFileById(ss.getId()).moveTo(DriveApp.getFolderById(prop_('ROOT_ID')));
+  PropertiesService.getScriptProperties().setProperty('JOIN_SHEET_ID', ss.getId());
+  return sh;
+}
 
 // ───────────────────────── question sequence ─────────────────────────
 

@@ -374,3 +374,16 @@ test('privacy consent: given on the phone or by the family; recorded with versio
   assert.equal(call('me', { key: old.key }).profile.consent, false);
   for (const x of [a, b]) call('deleteStoryteller', { id: x.id, trash: true });
 });
+
+test('flyer sign-ups: join form rows go to one sheet; formulas are neutralised; admin sees the count', () => {
+  assert.equal(call('signups').count, 0);
+  assert.ok(call('joinInterest', { email: 'a@example.org', consent: true, name: '=HYPERLINK("x")', buy: 'yes', src: 'flyer' }).ok);
+  assert.equal(call('joinInterest', { email: 'not-an-email', consent: true }).error, 'invalid');
+  assert.equal(call('joinInterest', { email: 'b@example.org' }).error, 'invalid');            // no consent
+  const out = call('signups');
+  assert.equal(out.count, 1);
+  const rows = JSON.parse(fs.readFileSync(g.pathOf(g.ctx.prop_('JOIN_SHEET_ID')), 'utf8')).Sheet1;
+  assert.equal(rows[1][1], '\'=HYPERLINK("x")');
+  assert.equal(rows[1][9], 'flyer');
+});
+

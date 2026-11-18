@@ -92,3 +92,10 @@ No secrets in this file. Keys and passwords live only in Vercel env vars and App
 - Needs the new Code.gs in Apps Script (New version) for `bookData`.
 - One trilingual flyer `marketing/posters/Flyer-One.dc.html` (★ board on the canvas): EN / JA / VI, free trial $0·¥0, digital book US$[PRICE]·¥9,800·[GIÁ], keep going US$[PRICE]/mo·¥980, "we show you how to print the PDF; we don't sell printed books". Purpose: demand test (count emails/scans per location).
 - Paused here (2026-11-15). Next: fill US$/VND prices + two QR codes (sample → /book.html?sample=en, join → email or a sign-up form); paste new Code.gs + New version (bookData, consent, book AI note); set up Lemon Squeezy store (tax-inclusive prices); confirm camera on both phones.
+
+## 2026-11-18: flyers with real QR codes, Join page, DENKI
+- `tools/qr.py`: dependency-free QR generator (byte mode, EC M, v1–6); codes checked with macOS CoreImage.
+- Print-ready flyer PDFs in `marketing/print/`: `HistoryMemo-flyer-EN-JA-VI-letter.pdf` (One flyer) and `DENKI-flyer-JA-A4.pdf` (Japanese, brand **DENKI 伝記**). QR: sample book + join form.
+- `/join.html` (en/ja/vi) → `/api/join` (honeypot, 5/hour/IP, validation) → Apps Script `SERVER.joinInterest` → sheet "HistoryMemo – trial sign-ups" in the HistoryMemo folder (`JOIN_SHEET_ID`). Admin shows the count (`signups`). Needs the new Code.gs as a New version; until then the form falls back to an email link.
+- English sample book is now fully English (Bà Lan answers in English); Vietnamese sample stays Vietnamese.
+- The design canvas is now shared publicly, so republishing from here was blocked; flyer sources in `marketing/posters/` are newer than the canvas.

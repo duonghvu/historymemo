@@ -8,7 +8,7 @@ const AI_NOTE = {
   ja: '要約・書き起こし・章は第三者の言語モデル（OpenAI、Anthropic）が生成し、誤りを含む場合があります。必ず元の録音と照らし合わせてご確認ください。HistoryMemo は独立したサービスであり、いかなる AI 提供事業者とも提携・承認関係にありません。',
 };
 
-// Bà Lan: answers in Vietnamese. The English edition keeps her words in Vietnamese and adds English chapters.
+// Bà Lan: answers in Vietnamese (Vietnamese edition) or English (English edition, LAN_EN).
 const LAN = [
   { stage: 'roots', q: { en: 'Tell us about your mother.', vi: 'Kể cho con cháu nghe về mẹ của bà.' },
     meta: ['2026-09-02', 'video', '3:12'],
@@ -57,6 +57,18 @@ const LAN_CHAPTERS = {
   },
 };
 
+// English sample edition: Bà Lan answered in English (keeps the English sample fully English).
+const LAN_EN = [
+ "My mother's name was Tôn Nữ Thị Hoà. In Huế we call our mother \"mạ\", you know. She got up at four in the morning, cooked the rice, then carried vegetables on her shoulder pole to Đông Ba market. She didn't talk much, but every night she brushed my hair and my older sister's, singing lullabies as she brushed. What I remember most is the smell of coconut oil on her hands. Now every time I brush little Mai's hair, I miss her.",
+ "Bánh bèo in little bowls, what else! At the end of our lane Mrs. Tư sold bánh bèo, one coin a bowl. My little brother and I saved all week and only dared to eat it on Saturday afternoon. Bright red shrimp floss, fragrant scallion oil, a splash of sweet fish sauce. In America I've made it again and again, but it's never the same. Must be because I don't have Mrs. Tư's clay bowls.",
+ "At Tết the whole family wrapped bánh tét in the yard and stayed up all night watching the pot. Father gave each of us a red envelope with a crisp new banknote inside. I didn't dare spend it; I kept it under my pillow for a whole month. On the first morning we wore new clothes to Thiên Mụ pagoda. No arguing, no crying, or the whole year would be unlucky.",
+ "I loved Trịnh Công Sơn's songs, especially \"Diễm xưa\". (she sings a few lines, then laughs) Oh, my voice shakes now. At seventeen I listened secretly on Father's little radio every afternoon. If he had found out he'd have scolded me, because he said those songs were too sad.",
+ "I met your grandfather in a bookshop on Trần Hưng Đạo street. We both reached for the same book. He let me have it, then waited outside the door for a whole hour just to ask if I had finished it. (laughs) He said he wanted to read it too, but I found out later he never read that book.",
+ "In 1981 we arrived in Houston with two hundred dollars and two small children. We didn't speak English. I sewed in a factory, your grandfather washed dishes. Three years later we went in with Auntie Sáu and opened a little bánh mì bakery. The first years were so hard, my dear, but I never once felt poor, because the whole family was still together.",
+ "On the first day I baked three hundred loaves, and by noon we had sold only twenty. I sat behind the counter close to tears. That afternoon an old American man came in and bought fifty loaves at once, saying they were for his church. Only years later did I learn Auntie Sáu had asked him to. That's why I tell my grandchildren: never forget the people who helped you.",
+ "Mai, Khoa, little Bông. When you're grown and hear my voice again, don't be sad. I want you to speak Vietnamese with your own children, even just a few words. Doing well at school is good, but caring for others matters more. Grandma loves you all so much."
+];
+
 // 田中花子さん: answers in Japanese.
 const HANAKO = [
   { stage: 'roots', q: 'お母さんについて話してください。', meta: ['2026-09-03', 'video', '3:05'],
@@ -95,9 +107,9 @@ const STAGE = {
   legacy: { en: 'For the grandchildren', vi: 'Lời nhắn cho con cháu', ja: '孫たちへ' },
 };
 const KIND = { en: { video: 'Video', voice: 'Voice' }, vi: { video: 'Video', voice: 'Ghi âm' }, ja: { video: '動画', voice: '音声' } };
-const LANG = { vi: 'Tiếng Việt', ja: '日本語' };
+const LANG = { en: 'English', vi: 'Tiếng Việt', ja: '日本語' };
 
-function build(ui, items, chapters, spoken, title, sub) {
+function build(ui, items, chapters, spoken, title, sub, said) {
   const stages = [...new Set(items.map(s => s.stage))];
   return {
     ok: true, sample: true, ui, title, sub,
@@ -108,7 +120,7 @@ function build(ui, items, chapters, spoken, title, sub) {
       original: typeof s.q === 'string' || ui === spoken ? '' : s.q[spoken],
       meta: `${s.meta[0]} · ${LANG[spoken]} · ${KIND[ui][s.meta[1]]} · ${s.meta[2]}`,
       url: `https://historymemo.vercel.app/book.html?sample=${ui}#story-${i + 1}`,
-      transcript: s.t,
+      transcript: said ? said[i] : s.t,
     })),
     aiNote: AI_NOTE[ui],
   };
@@ -117,5 +129,5 @@ function build(ui, items, chapters, spoken, title, sub) {
 export function sampleBook(lang) {
   if (lang === 'ja') return build('ja', HANAKO, HANAKO_CHAPTERS, 'ja', '田中花子の物語', '本人の声で語られた8のお話 · HistoryMemo');
   if (lang === 'vi') return build('vi', LAN, LAN_CHAPTERS.vi, 'vi', 'Chuyện đời Bà Lan', '8 câu chuyện, kể bằng chính giọng nói · HistoryMemo');
-  return build('en', LAN, LAN_CHAPTERS.en, 'vi', 'The Life of Bà Lan', '8 stories, told in her own voice · HistoryMemo');
+  return build('en', LAN, LAN_CHAPTERS.en, 'en', 'The Life of Bà Lan', '8 stories, told in her own voice · HistoryMemo', LAN_EN);
 }

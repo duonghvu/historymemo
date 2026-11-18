@@ -61,6 +61,11 @@ async function load() {
       <button class="ghost sm" id="out">Sign out</button></div>
 
     <div class="panel">
+      <div class="row" style="justify-content:space-between;align-items:center"><span>📝 Flyer sign-ups: <b id="su">…</b></span>
+        <a class="secondary sm" id="su-open" target="_blank" rel="noopener" hidden>Open sign-up sheet ↗</a></div>
+    </div>
+
+    <div class="panel">
       <h2>Storytellers</h2>
       <p class="muted">Each storyteller gets a private link (no email needed) and their own folder in Google Drive.
         People who sign in with Google get an account automatically.
@@ -91,6 +96,10 @@ async function load() {
       dvu@linadaichiagency.com</p>`;
 
   root.querySelector('#out').onclick = () => { try { localStorage.removeItem('a'); } catch {} a = null; login(); };
+  api('signups', {}, a).then(out => {
+    root.querySelector('#su').textContent = out.count;
+    const l = root.querySelector('#su-open'); l.href = out.url; l.hidden = false;
+  }).catch(() => { root.querySelector('#su').textContent = 'needs the new Apps Script version'; });
   root.querySelectorAll('[name=pl]').forEach(r => (r.onchange = () => { promptLang = r.value; load(); }));
   root.querySelector('#pfor').onchange = e => { promptFor = e.target.value; load(); };
   root.querySelectorAll('[data-do]').forEach(b => (b.onclick = () => doAction(b)));
