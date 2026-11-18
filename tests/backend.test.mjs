@@ -411,3 +411,65 @@ test('join → Mini trial: instant private link, 12 questions, then done; one pe
   assert.equal(again.reason, 'already has a trial');
 });
 
+
+test('trial limit counts real trial accounts: deleting a test trial frees its place', async () => {
+  const vm = await import('node:vm');
+  const setMax = n => vm.runInContext(`CONFIG.TRIAL_MAX = ${n}`, g.ctx);
+  const max = vm.runInContext('CONFIG.TRIAL_MAX', g.ctx);
+  setMax(g.ctx.listSt_().filter(s => s.trial).length + 1);
+  const t = call('joinInterest', { email: 'limit-test@example.org', consent: true, name: 'ZZ' });
+  assert.ok(t.link);
+  assert.equal(call('joinInterest', { email: 'other@example.org', consent: true }).reason, 'trial limit reached');
+  call('deleteStoryteller', { id: g.ctx.findByKey_(t.link.split('k=')[1]).id, trash: true });
+  const again = call('joinInterest', { email: 'other@example.org', consent: true });
+  assert.ok(again.link, 'place freed after the test trial was deleted');
+  call('deleteStoryteller', { id: g.ctx.findByKey_(again.link.split('k=')[1]).id, trash: true });
+  setMax(max);
+});
+
+test('analytics: anonymous visits, exit survey with one reminder email, admin summary', () => {
+  const day = new Date().toISOString().slice(0, 10);
+  const v = o => call('visit', { day, lang: 'en', country: 'US', device: 'mobile', ref: '', ...o });
+  v({ page: 'story', src: 'flyer', visitor: 'aaa' });
+  v({ page: 'story', src: 'flyer', visitor: 'aaa' });
+  v({ page: 'join', src: 'flyer', visitor: 'aaa' });
+  v({ page: 'story', src: '', visitor: 'bbb', device: 'desktop', ref: '=evil' });
+  assert.ok(call('exitSurvey', { page: 'story', lang: 'ja', reason: 'cost', other: 'ちょっと高い' }).ok);
+  const r = call('exitSurvey', { page: 'join', lang: 'en', reason: 'trust', email: 'later@example.org', consent: true, remindDays: 7 });
+  assert.match(r.remind, /^\d{4}-\d\d-\d\d$/);
+  assert.equal(call('exitSurvey', { reason: 'later', email: 'no-consent@example.org' }).remind, '');   // no consent → no email kept
+  call('exitSurvey', { reason: 'weird' });
+
+  const out = call('analytics', { days: 7 });
+  assert.equal(out.views, 4);
+  assert.equal(out.visitors, 2);                       // aaa and bbb (same person on two pages counts once)
+  assert.equal(out.pages.story, 3);
+  assert.equal(out.sources.flyer, 3);
+  assert.equal(out.funnel.storyVisitors, 2);
+  assert.equal(out.funnel.joinVisitors, 1);
+  assert.equal(out.exit.count, 4);
+  assert.equal(out.exit.reasons.other, 1);             // unknown reason → other
+  assert.equal(out.exit.emails, 1);
+  assert.equal(out.exit.words[0].text, 'ちょっと高い');
+  assert.ok(out.daily.find(d => d.day === day).views === 4);
+
+  const ss = JSON.parse(fs.readFileSync(g.pathOf(g.ctx.prop_('JOIN_SHEET_ID')), 'utf8'));
+  assert.equal(ss.Visits[4][7], '\'=evil');            // no formulas in the sheet
+  assert.equal(ss['Exit survey'][3][6], '');           // email without consent is not stored
+
+  // reminder: due rows get ONE email, then never again
+  const sent = [];
+  const mail = g.ctx.MailApp;
+  g.ctx.MailApp = { sendEmail: o => sent.push(o) };
+  assert.equal(g.ctx.remindExit_(), 0);                // not due yet
+  const file = g.pathOf(g.ctx.prop_('JOIN_SHEET_ID'));
+  const d = JSON.parse(fs.readFileSync(file, 'utf8'));
+  d['Exit survey'][2][7] = '2000-01-01';
+  fs.writeFileSync(file, JSON.stringify(d));
+  assert.equal(g.ctx.remindExit_(), 1);
+  assert.equal(sent[0].to, 'later@example.org');
+  assert.match(sent[0].htmlBody, /story\.html\?lang=en&s=reminder/);
+  assert.match(sent[0].htmlBody, /Sheridan/);
+  assert.equal(g.ctx.remindExit_(), 0);
+  g.ctx.MailApp = mail;
+});

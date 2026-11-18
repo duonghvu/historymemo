@@ -127,6 +127,7 @@ async function send(f) {
       body: JSON.stringify({ ...d, langs: d.langs.join(', '), lang, src }) });
     const out = await r.json().catch(() => ({}));
     if (!r.ok) throw new Error(out.error || r.status);
+    window.hmExit?.done();
     if (out.link) return ready(out.link);
     app.innerHTML = `<h1>${t.thanks}</h1><p class="lead">${t.thanksText}</p>
       <p><a class="primary" style="display:block;text-align:center;padding:18px;border-radius:22px;color:#fff;text-decoration:none" href="/book.html?sample=${lang}">📖 ${t.sample}</a></p>`;
@@ -150,5 +151,6 @@ function ready(link) {
 }
 render();
 </script>
+<script type="module" src="/exit.js"></script>
 </body>
 </html>

@@ -108,3 +108,11 @@ No secrets in this file. Keys and passwords live only in Vercel env vars and App
 - `/story.html`: emotional landing page (en / ja = DENKI 伝記 / vi) with the animated illustration `public/img/legacy.svg`.
 - Flyers reworked with the same message and a still of the illustration; PDFs re-exported to `public/flyers/` (QR verified).
 - Needs the new Code.gs as a New version (joinInterest, trial, signups, bookData).
+
+## 2026-11-18 (evening): Apps Script live, analytics, exit survey
+- User pasted the new Code.gs (New version). Checked live: a join sign-up returns a private Mini-trial link; the same email again → "already has a trial". The test account "ZZ Test (delete me)" (claude-test@example.com) must be deleted on the admin page + its 2 sheet rows.
+- Trial limit now counts the trial accounts that exist (not a counter), so deleting the test trial frees its place: 50 real trials.
+- Analytics: `public/exit.js` on story/join/print/sample-book pages sends one anonymous visit (`/api/track` → `SERVER.visit`, tab "Visits" in the sign-up spreadsheet). No cookie, no IP stored; daily visitor code = sha256(IP|UA|date|GAS_SECRET). Admin → 📊 Analytics (`/stats.html`, action `analytics`): visitors/day, sign-ups/day, funnel (story → join → sign-up → first story → 12 done), sources (QR `s=`), pages, countries, devices, referrers, trial users table, exit reasons.
+- Exit survey ("Before you go", en/ja/vi): mouse leaves the window (computer), coming back to the tab or 60 s (phone), or the "Not for you? Tell us why" link. Reasons cost / trust / no need / later / other + words + optional email with consent for ONE reminder in 1 week or 1 month (tab "Exit survey"; `remindExit_` in `hourly`, email includes the LLC address). Not shown after a sign-up.
+- Privacy + data-protection pages describe visit counts and the survey.
+- Needs Code.gs pasted again (New version) for visit / exitSurvey / analytics / reminders.

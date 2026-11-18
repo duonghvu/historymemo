@@ -62,7 +62,8 @@ async function load() {
 
     <div class="panel">
       <div class="row" style="justify-content:space-between;align-items:center"><span>📝 Flyer sign-ups: <b id="su">…</b></span>
-        <a class="secondary sm" id="su-open" target="_blank" rel="noopener" hidden>Open sign-up sheet ↗</a></div>
+        <span class="row"><a class="secondary sm" href="/stats.html">📊 Analytics</a>
+        <a class="secondary sm" id="su-open" target="_blank" rel="noopener" hidden>Open sign-up sheet ↗</a></span></div>
     </div>
 
     <div class="panel">

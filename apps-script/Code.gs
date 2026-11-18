@@ -115,7 +115,8 @@ function setup() {
 
 function doGet() { return json_({ ok: true, app: 'historymemo' }); }
 
-const READ_ONLY = { storytellers: 1, questions: 1, prompt: 1, bookData: 1 };
+// No script lock: read-only screens, and page-visit / exit-survey rows (appendRow is safe without it).
+const READ_ONLY = { storytellers: 1, questions: 1, prompt: 1, bookData: 1, analytics: 1, visit: 1, exitSurvey: 1 };
 
 function doPost(e) {
   let req;
@@ -449,6 +450,13 @@ const ADMIN = {
     return { ok: true, count: Math.max(0, rows.length - 1), url: SpreadsheetApp.openById(prop_('JOIN_SHEET_ID')).getUrl() };
   },
 
+  // Analytics page (public/stats.html): visits, sources, sign-ups, trial users, exit-survey reasons.
+  analytics(req) {
+    const days = Math.min(365, Math.max(1, Number(req.days) || 30));
+    const since = Utilities.formatDate(new Date(Date.now() - (days - 1) * 86400000), 'UTC', 'yyyy-MM-dd');
+    return Object.assign({ ok: true, days, since }, analytics_(since));
+  },
+
   testPush(req) {
     const st = getSt_(req.id);
     if (!st) return { error: 'not found' };
@@ -470,6 +478,27 @@ const SERVER = {
     return trial.st ? { ok: true, link: `${CONFIG.APP_URL}/?k=${trial.st.key}`, name: trial.st.name } : { ok: true, reason: trial.reason };
   },
 
+  // One page view on a public page (story, join, print, sample book). Anonymous: no IP, no cookie (see api/track.js).
+  visit(req) {
+    const c = (v, n) => clean_(v, n);
+    statsTab_(TAB_VISITS, VISIT_HEAD).appendRow([new Date().toISOString(), c(req.day, 10), c(req.page, 30), c(req.src, 40),
+      c(req.lang, 5), c(req.country, 4), c(req.device, 10), c(req.ref, 60), c(req.visitor, 12)]);
+    return { ok: true };
+  },
+
+  // "Before you go": why not, and optionally an email for ONE reminder (only with consent).
+  exitSurvey(req) {
+    const c = (v, n) => clean_(v, n);
+    const reason = EXIT_REASONS.indexOf(req.reason) >= 0 ? req.reason : 'other';
+    const email = c(req.email, 120);
+    const wantsMail = req.consent === true && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    const days = [7, 30].indexOf(Number(req.remindDays)) >= 0 ? Number(req.remindDays) : 7;
+    const on = wantsMail ? Utilities.formatDate(new Date(Date.now() + days * 86400000), 'UTC', 'yyyy-MM-dd') : '';
+    statsTab_(TAB_EXIT, EXIT_HEAD).appendRow([new Date().toISOString(), c(req.page, 30), c(req.lang, 5), c(req.country, 4),
+      reason, c(req.other, 300), wantsMail ? email : '', on, '', c(req.src, 40)]);
+    return { ok: true, remind: on };
+  },
+
   // "Sign in with Google": the server has already verified the Google ID token.
   loginGoogle(req) {
     const email = String(req.email || '').toLowerCase();
@@ -488,9 +517,10 @@ const JOIN_HEAD = ['Date', 'Name', 'Email', 'Phone / LINE', 'Page language', 'St
 /** Mini trial (12 questions) for a join-page sign-up: one per email, at most CONFIG.TRIAL_MAX in total.
  *  The private link is shown once on the thanks page; it is never sent back for an email that already has one. */
 function trialAccount_(req, email) {
-  if (listSt_().some(x => x.trial && (x.email || '').toLowerCase() === email.toLowerCase())) return { reason: 'already has a trial' };
-  const made = Number(prop_('TRIAL_COUNT') || 0);
-  if (made >= CONFIG.TRIAL_MAX) return { reason: 'trial limit reached' };
+  const trials = listSt_().filter(x => x.trial);
+  if (trials.some(x => (x.email || '').toLowerCase() === email.toLowerCase())) return { reason: 'already has a trial' };
+  // Counts the trial accounts that exist, so deleting one (e.g. a test) frees its place.
+  if (trials.length >= CONFIG.TRIAL_MAX) return { reason: 'trial limit reached' };
   const ui = UI_LANGS.indexOf(req.lang) >= 0 ? req.lang : 'en';
   const langs = String(req.langs || '').split(/[,\s]+/).filter(l => LANGS.indexOf(l) >= 0);
   const who = WHO_CALL[req.who] ? req.who : 'me';
@@ -498,7 +528,6 @@ function trialAccount_(req, email) {
   const st = createSt_({ name: who === 'me' ? name : `${name} – ${who}`, callName: WHO_CALL[who], uiLang: ui, langs: langs.length ? langs : [ui] });
   st.trial = 'mini'; st.email = email.toLowerCase(); st.trialAt = new Date().toISOString();
   saveSt_(st);
-  PropertiesService.getScriptProperties().setProperty('TRIAL_COUNT', String(made + 1));
   return { st };
 }
 
@@ -513,6 +542,114 @@ function joinSheet_() {
   DriveApp.getFileById(ss.getId()).moveTo(DriveApp.getFolderById(prop_('ROOT_ID')));
   PropertiesService.getScriptProperties().setProperty('JOIN_SHEET_ID', ss.getId());
   return sh;
+}
+
+// ───────────────────────── analytics + exit survey ─────────────────────────
+// Two more tabs in the sign-up spreadsheet: "Visits" (one row per page view) and "Exit survey".
+
+const TAB_VISITS = 'Visits';
+const TAB_EXIT = 'Exit survey';
+const VISIT_HEAD = ['Time (UTC)', 'Day', 'Page', 'Source (QR / link)', 'Language', 'Country', 'Device', 'Came from',
+                    'Visitor (anonymous, changes daily)'];
+const EXIT_HEAD = ['Time (UTC)', 'Page', 'Language', 'Country', 'Reason', 'In their words', 'Email (agreed to 1 reminder)',
+                   'Remind on', 'Reminded', 'Source'];
+const EXIT_REASONS = ['cost', 'trust', 'noneed', 'later', 'other'];
+
+function clean_(v, n) { return String(v == null ? '' : v).trim().slice(0, n).replace(/^[=+\-@]/, "'$&"); }
+
+function statsTab_(name, head) {
+  joinSheet_();
+  const ss = SpreadsheetApp.openById(prop_('JOIN_SHEET_ID'));
+  let sh = ss.getSheetByName(name);
+  if (!sh) {
+    sh = ss.insertSheet(name);
+    sh.getRange(1, 1, 1, head.length).setValues([head]);
+    sh.setFrozenRows(1);
+  }
+  return sh;
+}
+
+function rows_(sh) { return sh.getDataRange().getValues().slice(1).filter(r => r.some(v => v !== '')); }
+
+function analytics_(since) {
+  const tally = (list, f) => list.reduce((o, x) => { const k = f(x) || '(none)'; o[k] = (o[k] || 0) + 1; return o; }, {});
+  const day = v => String(v instanceof Date ? v.toISOString() : v).slice(0, 10);
+  const visits = rows_(statsTab_(TAB_VISITS, VISIT_HEAD)).filter(r => String(r[1] || day(r[0])) >= since);
+  const signups = rows_(joinSheet_()).filter(r => day(r[0]) >= since);
+  const exits = rows_(statsTab_(TAB_EXIT, EXIT_HEAD)).filter(r => day(r[0]) >= since);
+
+  const byDay = {};
+  visits.forEach(r => {
+    const d = String(r[1] || day(r[0]));
+    const o = byDay[d] = byDay[d] || { views: 0, visitors: {}, signups: 0 };
+    o.views++; o.visitors[r[8] || ('row' + o.views)] = 1;
+  });
+  signups.forEach(r => { const d = day(r[0]); (byDay[d] = byDay[d] || { views: 0, visitors: {}, signups: 0 }).signups++; });
+  const daily = Object.keys(byDay).sort().map(d => ({ day: d, views: byDay[d].views,
+    visitors: Object.keys(byDay[d].visitors).length, signups: byDay[d].signups }));
+  // A visitor = one anonymous daily code per page; counted per day (the code changes every day by design).
+  const visitorsOn = page => Object.keys(visits.filter(r => !page || r[2] === page)
+    .reduce((o, r) => { o[(r[1] || day(r[0])) + r[8]] = 1; return o; }, {})).length;
+
+  const trials = listSt_().filter(st => st.trial).map(st => {
+    const last = Object.keys(st.answered || {}).sort().pop() || '';
+    return { id: st.id, name: st.name, lang: st.uiLang || '', since: String(st.trialAt || '').slice(0, 10),
+             stories: st.progress || 0, of: MINI.length, last, done: (st.progress || 0) >= MINI.length };
+  }).sort((a, b) => (a.since < b.since ? 1 : -1));
+
+  return {
+    views: visits.length, visitors: visitorsOn(''), daily,
+    pages: tally(visits, r => r[2]), sources: tally(visits, r => r[3]), countries: tally(visits, r => r[5]),
+    devices: tally(visits, r => r[6]), referrers: tally(visits, r => r[7]), languages: tally(visits, r => r[4]),
+    funnel: { storyVisitors: visitorsOn('story'), joinVisitors: visitorsOn('join'), signups: signups.length,
+              trialsStarted: trials.filter(t => t.stories > 0).length, trialsDone: trials.filter(t => t.done).length },
+    signups: { count: signups.length, sources: tally(signups, r => r[9]), wouldBuy: tally(signups, r => r[8]),
+               countries: tally(signups, r => r[7]) },
+    exit: { count: exits.length, reasons: tally(exits, r => r[4]), emails: exits.filter(r => r[6]).length,
+            words: exits.filter(r => r[5]).slice(-20).reverse().map(r => ({ day: day(r[0]), reason: r[4], text: String(r[5]) })) },
+    trials, trialMax: CONFIG.TRIAL_MAX,
+    sheetUrl: SpreadsheetApp.openById(prop_('JOIN_SHEET_ID')).getUrl(),
+  };
+}
+
+const REMIND = {
+  en: { subject: 'Your life story, in your own voice: the reminder you asked for',
+        text: 'A while ago you asked us to remind you about HistoryMemo. One question a day, answered by talking for a minute or two, becomes a book your family keeps. The Mini trial is free.',
+        button: 'Start the free trial', page: 'en' },
+  ja: { subject: 'DENKI（伝記）：ご依頼のリマインダーです',
+        text: '以前、DENKI（伝記）のリマインダーをご希望いただきました。1日1つの質問に1〜2分話すだけで、ご家族に残る一冊になります。ミニ体験は無料です。',
+        button: '無料ミニ体験を始める', page: 'ja' },
+  vi: { subject: 'Chuyện đời bạn, bằng chính giọng của bạn: lời nhắc bạn đã yêu cầu',
+        text: 'Trước đây bạn nhờ chúng tôi nhắc về HistoryMemo. Mỗi ngày một câu hỏi, chỉ cần kể một hai phút, sẽ thành cuốn sách gia đình giữ mãi. Bản dùng thử Mini miễn phí.',
+        button: 'Bắt đầu dùng thử miễn phí', page: 'vi' },
+};
+const REMIND_FOOT = 'You asked for one reminder; we will not email you again. Lina &amp; Daichi LLC, 30 N Gould St, Ste N, Sheridan, WY 82801, USA · dvu@linadaichiagency.com';
+
+/** Hourly: send the one reminder people asked for in the exit survey, on or after its day. Returns how many. */
+function remindExit_() {
+  const id = prop_('JOIN_SHEET_ID');
+  if (!id) return 0;
+  const ss = SpreadsheetApp.openById(id);
+  const sh = ss.getSheetByName(TAB_EXIT);
+  if (!sh) return 0;
+  const today = Utilities.formatDate(new Date(), 'UTC', 'yyyy-MM-dd');
+  const all = sh.getDataRange().getValues();
+  let sent = 0;
+  for (let i = 1; i < all.length && sent < 20; i++) {
+    const r = all[i];
+    const on = String(r[7] instanceof Date ? r[7].toISOString() : r[7]).slice(0, 10);
+    if (!r[6] || !on || on > today || r[8]) continue;
+    const t = REMIND[r[2]] || REMIND.en;
+    try {
+      MailApp.sendEmail({ to: String(r[6]), subject: t.subject, htmlBody:
+        `<p style="font-size:17px;line-height:1.5">${t.text}</p>
+         <p><a href="${CONFIG.APP_URL}/story.html?lang=${t.page}&s=reminder" style="background:#b3261e;color:#fff;padding:12px 20px;border-radius:12px;text-decoration:none;font-weight:700">${t.button}</a></p>
+         <p style="font-size:12px;color:#777">${REMIND_FOOT}</p>` });
+      sh.getRange(i + 1, 9).setValue(today);
+      sent++;
+    } catch (err) { Logger.log('reminder: ' + err); sh.getRange(i + 1, 9).setValue('failed ' + today); }
+  }
+  return sent;
 }
 
 // ───────────────────────── question sequence ─────────────────────────
@@ -1127,6 +1264,7 @@ function transcribePending_(st, max) {
 // ───────────────────────── hourly: reminders + transcripts ─────────────────────────
 
 function hourly() {
+  withLock_(() => { try { remindExit_(); } catch (err) { Logger.log('exit reminders: ' + err); } });
   listSt_().forEach(st => withLock_(() => {
     // Before the reminder: unfinished uploads → transcripts → maybe a follow-up → family questions from the Sheet.
     try { checkUploads_(getSt_(st.id) || st); } catch (err) { Logger.log(`uploads ${st.id}: ${err}`); }

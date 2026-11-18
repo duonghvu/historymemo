@@ -18,6 +18,10 @@ Order: **free trial first**, payments later. Don't start Lemon Squeezy until peo
 - [ ] Check that the sheet "HistoryMemo – trial sign-ups" appeared in the HistoryMemo Drive folder with your row.
 - [ ] Tell me when it's done. I'll check it live, then delete the test storyteller.
 
+### 1b. Analytics + exit survey (you, 2 minutes)
+- [ ] Paste the new `apps-script/Code.gs` again → ⌘S → Manage deployments → ✏️ → **New version** (adds visits, exit survey, analytics, reminder emails).
+- [ ] Admin page → **📊 Analytics** (https://historymemo.vercel.app/stats.html). Check it weekly.
+
 ### 2. Phones
 - [ ] On both test phones, allow the camera again (Settings → Safari/Chrome → Camera → Allow). Record one video story on each.
 

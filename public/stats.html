@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>HistoryMemo Analytics</title>
+  <meta name="robots" content="noindex">
+  <link rel="icon" href="/icon-192.png">
+  <link rel="stylesheet" href="/style.css">
+  <style>
+    body { font-size: 16px; }
+    main { max-width: 960px; padding: 24px 0 60px; display: flex; flex-direction: column; gap: 18px; }
+    h1 { font-size: 28px; margin: 0; } h2 { margin: 0 0 10px; font-size: 19px; }
+    .top { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .range { display: flex; gap: 6px; flex-wrap: wrap; }
+    .range button { width: auto; min-height: 38px; padding: 6px 14px; font-size: 15px; border-radius: 99px; background: var(--card);
+      border: 1px solid var(--line); color: var(--ink); font-weight: 600; box-shadow: none; }
+    .range button.on { background: var(--ink); color: #fbf6ee; border-color: var(--ink); }
+    .panel { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 16px; min-width: 0; }
+    .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; }
+    .tile { background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; }
+    .tile b { display: block; font-size: 30px; line-height: 1.1; }
+    .tile span { color: var(--muted); font-size: 14px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px; }
+    .chart { position: relative; }
+    .chart svg { width: 100%; height: auto; display: block; overflow: visible; }
+    .chart .col { fill: var(--red); }
+    .chart .col.sec { fill: var(--gold, #c9962b); }
+    .chart .hit { fill: transparent; cursor: default; }
+    .chart g:hover .col { opacity: .75; }
+    .chart text { font-size: 11px; fill: var(--muted); }
+    .chart .grid-line { stroke: var(--line); stroke-width: 1; }
+    .tip { position: absolute; pointer-events: none; background: var(--ink); color: #fbf6ee; font-size: 13px; padding: 6px 9px; border-radius: 8px;
+      white-space: nowrap; transform: translate(-50%, -110%); display: none; z-index: 2; }
+    .hb { display: grid; grid-template-columns: minmax(80px, 38%) 1fr auto; gap: 6px 10px; align-items: center; font-size: 15px; }
+    .hb .l { overflow-wrap: anywhere; line-height: 1.25; }
+    .hb .t { height: 14px; background: #f1e6d4; border-radius: 4px; overflow: hidden; }
+    .hb .t i { display: block; height: 100%; background: var(--red); border-radius: 0 4px 4px 0; }
+    .hb .n { font-variant-numeric: tabular-nums; font-weight: 700; }
+    table { width: 100%; border-collapse: collapse; font-size: 15px; }
+    th, td { text-align: left; padding: 7px 6px; border-bottom: 1px solid var(--line); }
+    th { color: var(--muted); font-weight: 600; font-size: 13px; }
+    td.num { font-variant-numeric: tabular-nums; }
+    .wrap { overflow-x: auto; }
+    .pill { font-size: 12px; padding: 2px 8px; border-radius: 99px; background: #eee3d0; white-space: nowrap; }
+    .pill.ok { background: #d9f0dc; color: #1c5e2a; }
+    .muted { color: var(--muted); font-size: 14px; }
+    .funnel .hb .t i { background: var(--ink); }
+    blockquote { margin: 0 0 8px; padding: 8px 12px; background: #fff; border-left: 3px solid var(--red); border-radius: 6px; font-size: 15px; }
+    details summary { cursor: pointer; color: var(--muted); font-size: 14px; margin-top: 8px; }
+  </style>
+</head>
+<body>
+<main id="app"><p>Loading…</p></main>
+<script type="module" src="/stats.js"></script>
+</body>
+</html>
