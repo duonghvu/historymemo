@@ -101,3 +101,10 @@ No secrets in this file. Keys and passwords live only in Vercel env vars and App
 - The design canvas is now shared publicly, so republishing from here was blocked; flyer sources in `marketing/posters/` are newer than the canvas.
 - Flyer links (public): https://historymemo.vercel.app/flyers/historymemo-flyer.pdf (EN/JA/VI, Letter) and https://historymemo.vercel.app/flyers/denki-flyer-ja.pdf (DENKI, A4). Regenerate: headless Chrome `--print-to-pdf` of `marketing/posters/Flyer-One.dc.html` / `Flyer-JA.dc.html` (they carry `@page` size, margin 0), copy into `public/flyers/`.
 - Paused here (2026-11-18). Next: paste new Code.gs + New version (join sign-ups, bookData, consent); print flyers and count sign-ups; Lemon Squeezy store; camera check on both phones.
+
+## 2026-11-18 (later): for anyone, Mini trial, emotional story page
+- Message is now for anyone ("Your life story, in your own voice" / 「あなたの人生を、あなたの声で。」 / "Chuyện đời bạn, bằng chính giọng của bạn."), not only parents.
+- **Mini trial:** join page → `trialAccount_` creates a storyteller with `trial: 'mini'` (12 life questions `MINI`, then a "12 stories saved" screen). One per email, `CONFIG.TRIAL_MAX` = 50 total, 5 sign-ups/hour/IP. The private link is shown once on the thanks page (with QR); it is never re-sent for an existing email. Sheet column "Mini trial account" = storyteller id.
+- `/story.html`: emotional landing page (en / ja = DENKI 伝記 / vi) with the animated illustration `public/img/legacy.svg`.
+- Flyers reworked with the same message and a still of the illustration; PDFs re-exported to `public/flyers/` (QR verified).
+- Needs the new Code.gs as a New version (joinInterest, trial, signups, bookData).

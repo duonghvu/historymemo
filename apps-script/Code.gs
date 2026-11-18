@@ -35,10 +35,15 @@ const CONFIG = {
   PAUSE_AFTER_SKIPS: 2,    // this many skips in a row → no follow-ups for PAUSE_DAYS
   PAUSE_DAYS: 3,
   LOST_AFTER_DAYS: 7,
+  TRIAL_MAX: 50,          // automatic Mini trial accounts from the join page (then sign-ups are only collected)
   PRIVACY_VERSION: '2026-11-15', // public/privacy.html; bump when it changes (people are asked again)      // an upload the phone never finished → marked lost (the question is asked again)
 };
 
 const LANGS = ['en', 'vi', 'ja', 'teo'];
+// Mini trial: 12 of the 56 life questions (index into THEMES order), a whole life in short.
+const MINI = [0, 8, 7, 2, 24, 28, 35, 42, 44, 53, 54, 55];
+// Who tells the story (join page) → Vietnamese way to address them in the questions ({X}).
+const WHO_CALL = { me: 'Bạn', mother: 'Mẹ', father: 'Ba', grandmother: 'Bà', grandfather: 'Ông', other: 'Bạn' };
 const TEXT_LANGS = ['en', 'vi', 'ja'];        // languages with written questions + phone voices
 const UI_LANGS = ['en', 'vi', 'ja'];
 const MAX_SECONDS = 180;
@@ -458,9 +463,11 @@ const SERVER = {
     const s = (v, n) => String(v == null ? '' : v).trim().slice(0, n).replace(/^[=+\-@]/, "'$&");  // no formulas in the sheet
     const email = s(req.email, 120);
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || req.consent !== true) return { error: 'invalid' };
+    const trial = trialAccount_(req, email);
     joinSheet_().appendRow([new Date().toISOString(), s(req.name, 80), email, s(req.phone, 40), s(req.lang, 5), s(req.who, 40),
-      s(req.langs, 80), s(req.country, 60), s(req.buy, 20), s(req.src, 40), s(req.note, 500), 'yes (' + CONFIG.PRIVACY_VERSION + ')']);
-    return { ok: true };
+      s(req.langs, 80), s(req.country, 60), s(req.buy, 20), s(req.src, 40), s(req.note, 500), 'yes (' + CONFIG.PRIVACY_VERSION + ')',
+      trial.st ? trial.st.id : trial.reason]);
+    return trial.st ? { ok: true, link: `${CONFIG.APP_URL}/?k=${trial.st.key}`, name: trial.st.name } : { ok: true, reason: trial.reason };
   },
 
   // "Sign in with Google": the server has already verified the Google ID token.
@@ -476,7 +483,24 @@ const SERVER = {
 // ───────────────────────── flyer sign-ups ─────────────────────────
 
 const JOIN_HEAD = ['Date', 'Name', 'Email', 'Phone / LINE', 'Page language', 'Storyteller', 'Their languages', 'Country',
-                   'Would buy the book?', 'Flyer / source', 'Note', 'Agreed to be contacted'];
+                   'Would buy the book?', 'Flyer / source', 'Note', 'Agreed to be contacted', 'Mini trial account'];
+
+/** Mini trial (12 questions) for a join-page sign-up: one per email, at most CONFIG.TRIAL_MAX in total.
+ *  The private link is shown once on the thanks page; it is never sent back for an email that already has one. */
+function trialAccount_(req, email) {
+  if (listSt_().some(x => x.trial && (x.email || '').toLowerCase() === email.toLowerCase())) return { reason: 'already has a trial' };
+  const made = Number(prop_('TRIAL_COUNT') || 0);
+  if (made >= CONFIG.TRIAL_MAX) return { reason: 'trial limit reached' };
+  const ui = UI_LANGS.indexOf(req.lang) >= 0 ? req.lang : 'en';
+  const langs = String(req.langs || '').split(/[,\s]+/).filter(l => LANGS.indexOf(l) >= 0);
+  const who = WHO_CALL[req.who] ? req.who : 'me';
+  const name = String(req.name || '').trim().slice(0, 30) || 'Me';
+  const st = createSt_({ name: who === 'me' ? name : `${name} – ${who}`, callName: WHO_CALL[who], uiLang: ui, langs: langs.length ? langs : [ui] });
+  st.trial = 'mini'; st.email = email.toLowerCase(); st.trialAt = new Date().toISOString();
+  saveSt_(st);
+  PropertiesService.getScriptProperties().setProperty('TRIAL_COUNT', String(made + 1));
+  return { st };
+}
 
 /** "HistoryMemo – trial sign-ups" sheet in the HistoryMemo folder (created on first use). */
 function joinSheet_() {
@@ -503,11 +527,13 @@ function joinSheet_() {
 function promptAt_(st, n, plan) {
   const ui = st.uiLang || 'en';
   let phase, id, seq, row, stage, theme, themeIndex = -1;
-  if (n < LIFE_TOTAL) {
-    phase = 'life'; seq = n; id = String(n);
-    themeIndex = Math.floor(n / 7);
-    row = THEMES[themeIndex].q[n % 7];
-    stage = QUESTION_STAGE[n];
+  const mini = st.trial === 'mini';
+  if (n < LIFE_TOTAL && (!mini || n < MINI.length)) {
+    const li = mini ? MINI[n] : n;                   // index of the life question
+    phase = 'life'; seq = li; id = String(li);
+    themeIndex = Math.floor(li / 7);
+    row = THEMES[themeIndex].q[li % 7];
+    stage = QUESTION_STAGE[li];
     theme = THEMES[themeIndex].name[ui];
   } else if (n - LIFE_TOTAL < plan.timeline.length) {
     seq = n - LIFE_TOTAL;
@@ -529,7 +555,7 @@ function promptAt_(st, n, plan) {
   const text = { en: row[0], vi: fillVi_(row[1], st.callName), ja: row[2] };
   return {
     n, id, phase, seq, themeIndex, stage, lang, theme, text,
-    lifeTotal: LIFE_TOTAL,
+    lifeTotal: mini ? MINI.length : LIFE_TOTAL,
     spoken: TEXT_LANGS.indexOf(lang) >= 0 ? text[lang] : null, // question in the answer language
     display: text[ui],                                          // question in the app language
   };
@@ -556,6 +582,7 @@ function timelineId_(st, k) { return `t${st.id}_${k}`; }
 
 /** What to ask now: the queue first (follow-ups, family questions), then the fixed sequence. */
 function currentPrompt_(st, plan) {
+  if (st.trial === 'mini' && (st.progress || 0) >= MINI.length) return { trialDone: 'mini', n: st.progress, text: {} };
   const q = (plan.queue || [])[0];
   return q ? queuePrompt_(st, q) : promptAt_(st, st.progress || 0, plan);
 }

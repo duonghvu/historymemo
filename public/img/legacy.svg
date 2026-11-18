@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400" role="img" aria-label="A person tells their story into a phone; the words drift into a glowing book, and the people they love feel it.">
+  <style>
+    .wave { fill: none; stroke: #b3261e; stroke-width: 4; stroke-linecap: round; opacity: 0; transform-box: fill-box; transform-origin: left center; animation: wave 2.6s ease-out infinite; }
+    .w2 { animation-delay: .45s; } .w3 { animation-delay: .9s; }
+    .word { font-family: Georgia, 'Noto Serif', 'Noto Serif JP', 'Hiragino Mincho ProN', serif; font-weight: 700; fill: #6b3f2a; opacity: 0; animation: drift 8s linear infinite; }
+    .d1 { animation-delay: 0s; } .d2 { animation-delay: 1.3s; } .d3 { animation-delay: 2.6s; } .d4 { animation-delay: 3.9s; } .d5 { animation-delay: 5.2s; } .d6 { animation-delay: 6.5s; }
+    .glow { transform-box: fill-box; transform-origin: center; animation: breathe 3.6s ease-in-out infinite; }
+    .heart { fill: #b3261e; opacity: 0; transform-box: fill-box; transform-origin: center; animation: rise 4.2s ease-in infinite; }
+    .h2 { animation-delay: 1.4s; } .h3 { animation-delay: 2.8s; }
+    .sun { transform-box: fill-box; transform-origin: center; animation: breathe 7s ease-in-out infinite; }
+    @keyframes wave { 0% { opacity: 0; transform: scale(.85); } 25% { opacity: .9; } 100% { opacity: 0; transform: scale(1.25); } }
+    @keyframes drift { 0% { opacity: 0; transform: translate(0, 0) scale(1); } 12% { opacity: 1; } 72% { opacity: 1; } 100% { opacity: 0; transform: translate(170px, 52px) scale(.55); } }
+    @keyframes breathe { 0%, 100% { transform: scale(1); opacity: .85; } 50% { transform: scale(1.08); opacity: 1; } }
+    @keyframes rise { 0% { opacity: 0; transform: translateY(0) scale(.7); } 20% { opacity: 1; } 100% { opacity: 0; transform: translateY(-110px) scale(1.1); } }
+    /* still image (print, reduced motion): words resting along their path */
+    @media print { * { animation: none !important; } .word, .heart, .wave { opacity: 1; } }
+    @media (prefers-reduced-motion: reduce) { * { animation: none !important; } .word, .heart, .wave { opacity: 1; } }
+  </style>
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fdeedd"/><stop offset="1" stop-color="#f7cfa6"/>
+    </linearGradient>
+    <radialGradient id="bookglow" cx=".5" cy=".5" r=".5">
+      <stop offset="0" stop-color="#fff3c9" stop-opacity="1"/><stop offset="1" stop-color="#fff3c9" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="600" height="400" rx="28" fill="url(#sky)"/>
+  <circle class="sun" cx="468" cy="96" r="58" fill="#fbd29b"/>
+  <path d="M0 330 C120 300 230 318 330 312 C430 306 520 290 600 300 L600 372 Q600 400 572 400 L28 400 Q0 400 0 372 Z" fill="#eab489"/>
+  <path d="M0 356 C140 340 280 352 400 346 C480 342 550 334 600 338 L600 372 Q600 400 572 400 L28 400 Q0 400 0 372 Z" fill="#dd9f74"/>
+
+  <!-- storyteller, seated, phone in hand -->
+  <g fill="#5a3322">
+    <path d="M58 338 C58 270 92 238 132 238 C172 238 204 270 204 338 Z"/>
+    <circle cx="132" cy="200" r="31"/>
+    <circle cx="116" cy="176" r="13"/>
+    <path d="M168 270 C182 262 190 250 186 240" stroke="#5a3322" stroke-width="14" stroke-linecap="round" fill="none"/>
+  </g>
+  <rect x="178" y="222" width="19" height="31" rx="4" fill="#2a211b"/>
+  <rect x="181" y="226" width="13" height="21" rx="2" fill="#f3e7d3"/>
+
+  <!-- voice -->
+  <path class="wave w1" d="M206 228 a20 20 0 0 1 0 30"/>
+  <path class="wave w2" d="M216 220 a30 30 0 0 1 0 46"/>
+  <path class="wave w3" d="M226 212 a40 40 0 0 1 0 62"/>
+
+  <!-- memories drifting toward the book -->
+  <text class="word d1" x="238" y="214" font-size="19">I remember…</text>
+  <text class="word d2" x="250" y="250" font-size="22">ありがとう</text>
+  <text class="word d3" x="232" y="182" font-size="20">Mẹ ơi</text>
+  <text class="word d4" x="262" y="232" font-size="18">1968</text>
+  <text class="word d5" x="244" y="268" font-size="22">家族</text>
+  <text class="word d6" x="270" y="198" font-size="22">♪</text>
+
+  <!-- the book -->
+  <ellipse class="glow" cx="420" cy="300" rx="110" ry="62" fill="url(#bookglow)"/>
+  <path d="M420 292 C392 278 360 276 338 284 L338 338 C360 330 392 332 420 346 Z" fill="#fffaf1" stroke="#c9962b" stroke-width="2.5"/>
+  <path d="M420 292 C448 278 480 276 502 284 L502 338 C480 330 448 332 420 346 Z" fill="#fffaf1" stroke="#c9962b" stroke-width="2.5"/>
+  <path d="M352 298 C370 292 392 294 408 302 M352 310 C370 304 392 306 408 314 M352 322 C370 316 390 318 404 324" stroke="#d9c4a0" stroke-width="2" fill="none"/>
+  <path d="M432 302 C448 294 470 292 488 298 M432 314 C448 306 470 304 488 310" stroke="#d9c4a0" stroke-width="2" fill="none"/>
+  <circle cx="466" cy="324" r="8" fill="#b3261e"/><path d="M463.5 320 L470 324 L463.5 328 Z" fill="#fff"/>
+
+  <!-- the people they love -->
+  <g fill="#7a4632">
+    <circle cx="538" cy="246" r="19"/>
+    <path d="M512 336 C512 296 524 270 538 270 C552 270 564 296 564 336 Z"/>
+  </g>
+  <g fill="#94563d">
+    <circle cx="574" cy="270" r="13"/>
+    <path d="M556 338 C556 310 564 290 574 290 C584 290 592 310 592 338 Z"/>
+  </g>
+
+  <!-- love rising -->
+  <path class="heart h1" d="M420 268 c-6-10-22-8-22 4 c0 10 22 22 22 22 s22-12 22-22 c0-12-16-14-22-4z"/>
+  <path class="heart h2" d="M540 214 c-4-7-15-6-15 3 c0 7 15 15 15 15 s15-8 15-15 c0-9-11-10-15-3z"/>
+  <path class="heart h3" d="M386 262 c-4-7-14-6-14 3 c0 6 14 14 14 14 s14-8 14-14 c0-9-10-10-14-3z"/>
+</svg>

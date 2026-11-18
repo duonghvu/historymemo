@@ -2,6 +2,8 @@
 // Validates, drops bots (honeypot field "website"), limits repeats per IP, then appends a row in Apps Script.
 import { gas, readBody } from './_lib.js';
 
+export const config = { maxDuration: 60 };   // creating a trial account takes ~20 s
+
 const hits = new Map();   // best effort, per server instance
 
 export default async function handler(req, res) {
@@ -27,7 +29,7 @@ export default async function handler(req, res) {
       langs: s(b.langs, 80), country: s(b.country, 60), buy: s(b.buy, 20), src: s(b.src, 40), note: s(b.note, 500),
     });
     res.setHeader('Cache-Control', 'no-store');
-    return out.error ? res.status(400).json({ error: out.error }) : res.status(200).json({ ok: true });
+    return out.error ? res.status(400).json({ error: out.error }) : res.status(200).json({ ok: true, link: out.link || '', reason: out.reason || '' });
   } catch (err) {
     return res.status(502).json({ error: String(err.message || err) });
   }

@@ -204,6 +204,16 @@ function home() {
     return;
   }
   const p = S.next;
+  if (p && p.trialDone) {          // Mini trial: all 12 stories told
+    render(`
+      <div class="center">
+        <p class="big">🎉</p>
+        <h1>${tr('trialDoneTitle')}</h1>
+        <p class="lead">${tr('trialDoneLead')}</p>
+        <a class="primary" href="/join.html?lang=${L()}&s=trial-done" style="text-decoration:none;text-align:center">${tr('trialDoneMore')}</a>
+      </div>`, 'trialDone');
+    return;
+  }
   const per = S.profile.perDay || 1;
   const kind = S.profile.defaultKind || 'video';
   const other = kind === 'video' ? 'audio' : 'video';

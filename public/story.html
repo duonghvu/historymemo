@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Your Life Story · HistoryMemo</title>
+  <meta name="description" content="Your life story, in your own voice. For your children, your friends, and the people who come after you. Free Mini trial.">
+  <meta property="og:title" content="Your life story, in your own voice">
+  <meta property="og:description" content="One day, someone you love will want to hear it again. Free Mini trial: 12 stories.">
+  <meta property="og:image" content="https://historymemo.vercel.app/img/legacy.svg">
+  <link rel="icon" href="/icon-192.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Noto+Serif:wght@600;700&family=Noto+Serif+JP:wght@600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap">
+  <style>
+    :root { --bg: #fbf6ee; --ink: #2a211b; --muted: #6e5e52; --red: #b3261e; --red-d: #8c1d17; --sand: #f3e7d3; --line: #e6d8c3; }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; background: var(--bg); color: var(--ink); }
+    body { font-family: 'Be Vietnam Pro', 'Noto Sans JP', -apple-system, sans-serif; font-size: 18px; line-height: 1.6; }
+    .serif { font-family: 'Noto Serif', 'Noto Serif JP', Georgia, serif; }
+    :lang(ja) .serif { font-family: 'Noto Serif JP', serif; }
+    .wrap { max-width: 980px; margin: 0 auto; padding: 0 16px; }
+    header { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 16px 0; flex-wrap: wrap; }
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 22px; }
+    .brand .dot { width: 34px; height: 34px; border-radius: 50%; background: var(--red); display: grid; place-items: center; }
+    .brand small { font-size: 17px; color: var(--red); }
+    .langs { display: flex; gap: 6px; }
+    .langs button { font: inherit; font-size: 14px; font-weight: 600; padding: 7px 13px; border-radius: 99px; border: 1px solid var(--line); background: #fff; color: var(--ink); cursor: pointer; }
+    .langs button.on { background: var(--ink); color: #fbf6ee; border-color: var(--ink); }
+
+    .hero { display: grid; grid-template-columns: 1.05fr 1fr; gap: 32px; align-items: center; padding: 18px 0 36px; }
+    .hero h1 { font-size: clamp(34px, 6vw, 58px); line-height: 1.12; margin: 0; color: var(--red); text-wrap: balance; }
+    .hero .sub { font-size: clamp(19px, 2.4vw, 23px); margin: 16px 0 0; color: var(--ink); }
+    .hero img { width: 100%; height: auto; display: block; border-radius: 28px; box-shadow: 0 18px 40px rgba(90, 51, 34, .18); }
+    .cta { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 26px; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; min-height: 56px; padding: 14px 24px; border-radius: 18px; font-weight: 700; font-size: 18px; text-decoration: none; }
+    .btn.red { background: var(--red); color: #fff; box-shadow: 0 6px 0 var(--red-d); }
+    .btn.red:active { transform: translateY(3px); box-shadow: 0 3px 0 var(--red-d); }
+    .btn.ghost { background: #fff; color: var(--ink); border: 1px solid var(--line); }
+    .note { font-size: 14px; color: var(--muted); margin: 12px 0 0; }
+
+    section { padding: 34px 0; }
+    h2 { font-size: clamp(26px, 3.6vw, 36px); margin: 0 0 18px; text-wrap: balance; }
+    .moments { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+    .moment { background: #fff; border: 1px solid var(--line); border-radius: 22px; padding: 22px; }
+    .moment .ic { width: 54px; height: 54px; border-radius: 16px; background: var(--sand); display: grid; place-items: center; font-size: 28px; margin-bottom: 12px; }
+    .moment h3 { margin: 0 0 6px; font-size: 21px; }
+    .moment p { margin: 0; color: var(--muted); }
+    .steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; counter-reset: s; }
+    .step { display: flex; gap: 12px; align-items: flex-start; }
+    .step::before { counter-increment: s; content: counter(s); flex: none; width: 36px; height: 36px; border-radius: 50%; background: var(--red); color: #fff; display: grid; place-items: center; font-weight: 700; }
+    .plans { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+    .plan { background: #fff; border: 1px solid var(--line); border-radius: 22px; padding: 22px; }
+    .plan.hl { border: 2px solid var(--red); }
+    .plan .price { font-size: 30px; color: var(--red); font-weight: 700; margin: 4px 0 8px; }
+    .plan p { margin: 0; color: var(--muted); }
+    .quote { background: var(--sand); border-radius: 28px; padding: 30px; text-align: center; }
+    .quote p { font-size: clamp(22px, 3vw, 30px); margin: 0 0 18px; line-height: 1.4; }
+    footer { border-top: 1px solid var(--line); padding: 22px 0 40px; font-size: 13px; color: var(--muted); }
+    footer a { color: var(--muted); }
+
+    .reveal { opacity: 0; transform: translateY(24px); transition: opacity .8s ease, transform .8s ease; }
+    .reveal.in { opacity: 1; transform: none; }
+    @media (prefers-reduced-motion: reduce) { .reveal { opacity: 1; transform: none; transition: none; } }
+    @media (max-width: 760px) {
+      .hero { grid-template-columns: 1fr; gap: 20px; }
+      .hero img { order: -1; }
+      .moments, .steps, .plans { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div class="wrap" id="page"></div>
+<script>
+const T = {
+  en: {
+    brand: 'HistoryMemo', title: 'Your Life Story · HistoryMemo',
+    h1: 'Your life story, in your own voice.', sub: 'One day, someone you love will want to hear it again.',
+    start: 'Start telling your story — free', sample: 'See a sample book', freeNote: 'Free Mini trial: 12 stories. No card needed.',
+    momentsTitle: 'Some stories only you can tell',
+    moments: [['👶', 'For your children', 'Your first home, your first love, the day they were born. The stories they will wish they had asked about.'],
+              ['🤝', 'For your friends', 'The laughter, the adventures, the years you shared, kept in your own words.'],
+              ['🌏', 'For the world', 'Every life is a piece of history. Leave yours for the people who come after you.']],
+    howTitle: 'As easy as talking',
+    steps: ['A gentle question each day, read aloud in your language.', 'Answer by talking, on video or just your voice.', 'Your stories become a book, with your voice on every page.'],
+    plansTitle: 'Start free',
+    plans: [['Mini trial', 'Free', '12 stories, one a day. Your private link arrives the moment you sign up.'],
+            ['Digital book', 'US$65 · ¥9,800', 'All 56 stories, chapters in life order, every video and voice, a PDF to share. Want it in print? We show you how to print the PDF.']],
+    quote: 'So many of us say, “I wish I had recorded my mother’s voice.” Don’t let your story become that wish.',
+    langs: 'English · 日本語 · Tiếng Việt · Teochew',
+    ai: 'AI-powered summaries and chapters are generated by third-party language models and may contain errors. Always check them against the original recordings. HistoryMemo is an independent service and is not affiliated with or endorsed by any AI provider.',
+  },
+  ja: {
+    brand: 'DENKI', brandSmall: '伝記', title: 'あなたの人生を、あなたの声で · DENKI 伝記',
+    h1: 'あなたの人生を、あなたの声で。', sub: 'いつか、大切な人が、もう一度その声を聞きたくなる日が来る。',
+    start: '無料で話しはじめる', sample: '見本の本を見る', freeNote: '無料ミニ体験：12話。カード登録は不要です。',
+    momentsTitle: 'あなたにしか話せない物語がある',
+    moments: [['👶', '子どもへ', '初めての家、初恋、わが子が生まれた日のこと。いつか「聞いておけばよかった」と思う物語。'],
+              ['🤝', '友へ', '笑い合った日々も、旅も、ともに過ごした年月も、あなたの言葉のまま。'],
+              ['🌏', '未来へ', 'ひとりの人生は、ひとつの歴史。次の世代へ残しましょう。']],
+    howTitle: '話すだけ',
+    steps: ['毎日ひとつ、やさしい質問をあなたの言葉で読み上げます。', '話して答えるだけ。動画でも、声だけでも。', 'お話が一冊の本に。どのページにも、あなたの声。'],
+    plansTitle: 'まずは無料で',
+    plans: [['ミニ体験', '無料', '12話、1日1問。お申し込み後すぐに、専用リンクをお渡しします。'],
+            ['デジタル版', '¥9,800（税込）', '全56話、人生の順の章立て、すべての動画と音声、共有できる PDF。製本をご希望の方には PDF の印刷方法をご案内します。']],
+    quote: '「母の声を、録っておけばよかった」と多くの人が言います。あなたの物語を、その後悔にしないために。',
+    langs: '日本語 · English · Tiếng Việt · 潮州語',
+    ai: '要約や章は第三者の言語モデルが生成し、誤りを含む場合があります。必ず元の録音でご確認ください。DENKI（HistoryMemo）は独立したサービスで、AI 提供事業者と提携・承認関係にありません。価格は税込です。',
+  },
+  vi: {
+    brand: 'HistoryMemo', title: 'Chuyện đời bạn · HistoryMemo',
+    h1: 'Chuyện đời bạn, bằng chính giọng của bạn.', sub: 'Một ngày nào đó, người bạn thương sẽ muốn nghe lại giọng ấy.',
+    start: 'Bắt đầu kể chuyện — miễn phí', sample: 'Xem sách mẫu', freeNote: 'Dùng thử Mini miễn phí: 12 câu chuyện. Không cần thẻ.',
+    momentsTitle: 'Có những câu chuyện chỉ bạn mới kể được',
+    moments: [['👶', 'Cho con cháu', 'Căn nhà đầu tiên, mối tình đầu, ngày con chào đời. Những chuyện mai này con cháu ước gì đã kịp hỏi.'],
+              ['🤝', 'Cho bạn bè', 'Những tiếng cười, những chuyến đi, những năm tháng bên nhau, giữ nguyên lời bạn kể.'],
+              ['🌏', 'Cho mai sau', 'Mỗi cuộc đời là một trang lịch sử. Hãy để lại cho những người đến sau.']],
+    howTitle: 'Dễ như trò chuyện',
+    steps: ['Mỗi ngày một câu hỏi nhẹ nhàng, đọc to bằng tiếng của bạn.', 'Chỉ cần kể, bằng video hoặc giọng nói.', 'Câu chuyện thành sách, trang nào cũng có giọng bạn.'],
+    plansTitle: 'Bắt đầu miễn phí',
+    plans: [['Dùng thử Mini', 'Miễn phí', '12 câu chuyện, mỗi ngày một câu. Đăng ký xong là có ngay link ghi âm riêng.'],
+            ['Sách điện tử', '1.600.000đ · US$65', 'Đủ 56 câu chuyện, các chương theo dòng đời, mọi video và giọng nói, file PDF để chia sẻ. Muốn sách in? Chúng tôi hướng dẫn tự in PDF.']],
+    quote: 'Nhiều người từng nói: “Giá mà mình đã kịp ghi lại giọng của mẹ.” Đừng để câu chuyện của bạn thành lời tiếc nuối ấy.',
+    langs: 'Tiếng Việt · English · 日本語 · Tiếng Tiều',
+    ai: 'Phần tóm tắt và các chương do mô hình ngôn ngữ của bên thứ ba tạo ra và có thể có sai sót; hãy luôn đối chiếu với bản ghi gốc. HistoryMemo là dịch vụ độc lập, không liên kết và không được bảo trợ bởi nhà cung cấp AI nào.',
+  },
+};
+const params = new URLSearchParams(location.search);
+const src = (params.get('s') || 'story').slice(0, 40);
+const nav = (navigator.language || 'en').slice(0, 2);
+let lang = ['en', 'ja', 'vi'].includes(params.get('lang')) ? params.get('lang') : (['ja', 'vi'].includes(nav) ? nav : 'en');
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+function render() {
+  const t = T[lang];
+  document.documentElement.lang = lang;
+  document.title = t.title;
+  const join = `/join.html?lang=${lang}&s=${encodeURIComponent(src)}`;
+  document.getElementById('page').innerHTML = `
+  <header>
+    <div class="brand"><span class="dot"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3z"/><path d="M19 11a7 7 0 0 1-14 0"/><path d="M12 18v3"/></svg></span>
+      <span class="serif">${t.brand}</span>${t.brandSmall ? `<small class="serif">${t.brandSmall}</small>` : ''}</div>
+    <div class="langs">${[['en', 'English'], ['ja', '日本語'], ['vi', 'Tiếng Việt']].map(([l, n]) => `<button data-l="${l}" class="${l === lang ? 'on' : ''}">${n}</button>`).join('')}</div>
+  </header>
+  <div class="hero">
+    <div>
+      <h1 class="serif">${esc(t.h1)}</h1>
+      <p class="sub">${esc(t.sub)}</p>
+      <div class="cta"><a class="btn red" href="${join}">${esc(t.start)}</a><a class="btn ghost" href="/book.html?sample=${lang}">📖 ${esc(t.sample)}</a></div>
+      <p class="note">${esc(t.freeNote)} · ${esc(t.langs)}</p>
+    </div>
+    <img src="/img/legacy.svg" alt="" width="600" height="400">
+  </div>
+  <section class="reveal"><h2 class="serif">${esc(t.momentsTitle)}</h2>
+    <div class="moments">${t.moments.map(([i, h, p]) => `<div class="moment"><div class="ic">${i}</div><h3>${esc(h)}</h3><p>${esc(p)}</p></div>`).join('')}</div></section>
+  <section class="reveal"><h2 class="serif">${esc(t.howTitle)}</h2>
+    <div class="steps">${t.steps.map(s => `<div class="step"><span>${esc(s)}</span></div>`).join('')}</div></section>
+  <section class="reveal"><h2 class="serif">${esc(t.plansTitle)}</h2>
+    <div class="plans">${t.plans.map(([h, pr, p], i) => `<div class="plan ${i === 0 ? 'hl' : ''}"><b>${esc(h)}</b><div class="price serif">${esc(pr)}</div><p>${esc(p)}</p></div>`).join('')}</div></section>
+  <section class="reveal"><div class="quote"><p class="serif">${esc(t.quote)}</p><a class="btn red" href="${join}">${esc(t.start)}</a></div></section>
+  <footer>
+    <p>${esc(t.ai)}</p>
+    <p>Lina &amp; Daichi LLC · <a href="/privacy.html">Privacy</a> · <a href="/terms.html">Terms</a> · <a href="/disclaimer.html">Disclaimer</a>${lang === 'ja' ? ' · <a href="/tokushoho.html">特定商取引法に基づく表記</a>' : ''} · dvu@linadaichiagency.com</p>
+  </footer>`;
+  document.querySelectorAll('[data-l]').forEach(b => b.onclick = () => { lang = b.dataset.l; render(); });
+  const io = 'IntersectionObserver' in window ? new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { threshold: .15 }) : null;
+  document.querySelectorAll('.reveal').forEach(el => io ? io.observe(el) : el.classList.add('in'));
+}
+render();
+</script>
+</body>
+</html>

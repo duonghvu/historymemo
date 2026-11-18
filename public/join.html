@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Join the Free Trial · HistoryMemo</title>
+  <title>Tell Your Story · HistoryMemo</title>
   <meta name="description" content="Sign up for the HistoryMemo free trial: your parents' life story, in their own voice.">
   <link rel="icon" href="/icon-192.png">
   <link rel="stylesheet" href="/style.css">
@@ -34,32 +34,40 @@
 </head>
 <body>
 <main id="app"></main>
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
 <script type="module">
 const T = {
-  en: { title: 'Join the free trial', lead: "Your parents' life story, in their own voice. Tell us a little, and we'll email you within 2 business days.",
-        name: 'Your name', email: 'Your email', phone: 'Phone or LINE', opt: '(optional)', who: 'Who would tell the stories?',
-        whoOpts: ['Mother', 'Father', 'Grandmother', 'Grandfather', 'Someone else'], langs: 'Their language', country: 'Where do you live?',
+  en: { title: 'Tell your story. Free trial.', lead: "Your life, in your own voice: for your children, your friends, the people who come after you. Sign up and get your private recording link right away.",
+        name: 'Your name', email: 'Your email', phone: 'Phone or LINE', opt: '(optional)', who: 'Who will tell the story?',
+        whoOpts: ['Me', 'My mother', 'My father', 'My grandmother', 'My grandfather', 'Someone else'], langs: 'Language for the questions', country: 'Where do you live?',
         buy: 'After the free trial, would you buy the digital book (US$65 / ¥9,800)?', buyOpts: [['yes', 'Yes, probably'], ['maybe', 'Maybe'], ['trial', 'Just the free trial for now']],
         note: 'Anything else?', consent: 'I agree to be contacted about the HistoryMemo trial, and I have read the <a href="/privacy.html" target="_blank">privacy policy</a>.',
-        send: 'Join the free trial', sending: 'Sending…', thanks: 'Thank you! 🎉', thanksText: "We'll email you within 2 business days to set up the free trial.",
+        send: 'Join the free trial', sending: 'Creating your private link… (about 20 seconds)', thanks: 'Thank you! 🎉', thanksText: "We'll email you within 2 business days to set up the free trial.",
+        ready: 'Your private recording link is ready 🎉', readyText: '12 questions, one a day. Open it on the phone of the person telling the story, and add it to the home screen.',
+        open: '🎙️ Open my recording page', copy: 'Copy link', copied: 'Copied ✓', keep: 'Keep this link private: anyone with it can record. Save it now; for your security we cannot show it again.',
         sample: 'See a sample book', needEmail: 'Please enter your email.', needConsent: 'Please tick the box to agree.', failed: 'Could not send. Please email us instead:' },
-  ja: { title: 'DENKI（伝記）無料体験に申し込む', lead: '親の人生を、本人の声で一冊の本に。簡単にご記入いただければ、2営業日以内にメールでご連絡します。',
+  ja: { title: 'DENKI（伝記）無料体験', lead: 'あなたの人生を、あなたの声で。子どもへ、友へ、これからの人へ。お申し込み後すぐに、あなた専用の録音リンクをお渡しします。',
         name: 'お名前', email: 'メールアドレス', phone: '電話番号・LINE', opt: '（任意）', who: 'お話をするのはどなたですか？',
-        whoOpts: ['母', '父', '祖母', '祖父', 'その他'], langs: '話す言葉', country: 'お住まいの国・地域',
+        whoOpts: ['自分', '母', '父', '祖母', '祖父', 'その他'], langs: '質問の言語', country: 'お住まいの国・地域',
         buy: '無料体験の後、デジタル版（¥9,800 税込）を購入したいと思いますか？', buyOpts: [['yes', 'はい、たぶん'], ['maybe', 'わからない'], ['trial', 'まずは無料体験だけ']],
         note: 'その他・ご質問', consent: 'DENKI（伝記・HistoryMemo）の体験についての連絡を受け取ることに同意し、<a href="/privacy.html#ja" target="_blank">プライバシーポリシー</a>を読みました。',
-        send: '無料体験に申し込む', sending: '送信中…', thanks: 'ありがとうございます 🎉', thanksText: '2営業日以内に、無料体験のご案内をメールでお送りします。',
+        send: '無料体験に申し込む', sending: '専用リンクを作成中…（約20秒）', thanks: 'ありがとうございます 🎉', thanksText: '2営業日以内に、無料体験のご案内をメールでお送りします。',
+        ready: '専用の録音リンクができました 🎉', readyText: '質問は12問、1日1問。お話をする方のスマホで開き、ホーム画面に追加してください。',
+        open: '🎙️ 録音ページを開く', copy: 'リンクをコピー', copied: 'コピーしました ✓', keep: 'このリンクは他の人に教えないでください（リンクを知っている人は録音できます）。安全のため、再表示はできません。今すぐ保存してください。',
         sample: '見本の本を見る', needEmail: 'メールアドレスを入力してください。', needConsent: '同意のチェックをお願いします。', failed: '送信できませんでした。こちらにメールでご連絡ください：' },
-  vi: { title: 'Đăng ký dùng thử miễn phí', lead: 'Cuốn sách đời ông bà, bằng chính giọng kể. Điền vài dòng, chúng tôi sẽ email cho bạn trong 2 ngày làm việc.',
+  vi: { title: 'Kể chuyện đời bạn. Dùng thử miễn phí.', lead: 'Cuộc đời bạn, bằng chính giọng của bạn: cho con cháu, bạn bè, cho những người đến sau. Đăng ký xong là có ngay đường link ghi âm riêng.',
         name: 'Tên của bạn', email: 'Email của bạn', phone: 'Số điện thoại hoặc Zalo/LINE', opt: '(không bắt buộc)', who: 'Ai sẽ kể chuyện?',
-        whoOpts: ['Mẹ', 'Ba', 'Bà', 'Ông', 'Người khác'], langs: 'Ngôn ngữ của người kể', country: 'Bạn sống ở đâu?',
+        whoOpts: ['Tôi', 'Mẹ tôi', 'Ba tôi', 'Bà tôi', 'Ông tôi', 'Người khác'], langs: 'Ngôn ngữ câu hỏi', country: 'Bạn sống ở đâu?',
         buy: 'Sau khi dùng thử, bạn có muốn mua sách điện tử (1.600.000đ / US$65) không?', buyOpts: [['yes', 'Có, chắc là có'], ['maybe', 'Có thể'], ['trial', 'Trước mắt chỉ dùng thử']],
         note: 'Bạn muốn nhắn thêm gì không?', consent: 'Tôi đồng ý được liên hệ về việc dùng thử HistoryMemo và đã đọc <a href="/privacy.html#vi" target="_blank">chính sách quyền riêng tư</a>.',
-        send: 'Đăng ký dùng thử', sending: 'Đang gửi…', thanks: 'Cảm ơn bạn! 🎉', thanksText: 'Chúng tôi sẽ email cho bạn trong 2 ngày làm việc để bắt đầu dùng thử.',
+        send: 'Đăng ký dùng thử', sending: 'Đang tạo link riêng… (khoảng 20 giây)', thanks: 'Cảm ơn bạn! 🎉', thanksText: 'Chúng tôi sẽ email cho bạn trong 2 ngày làm việc để bắt đầu dùng thử.',
+        ready: 'Đường link ghi âm riêng đã sẵn sàng 🎉', readyText: '12 câu hỏi, mỗi ngày một câu. Mở trên điện thoại của người kể và thêm vào màn hình chính.',
+        open: '🎙️ Mở trang ghi âm', copy: 'Sao chép link', copied: 'Đã sao chép ✓', keep: 'Giữ link này riêng tư: ai có link đều ghi âm được. Hãy lưu lại ngay; vì an toàn, chúng tôi không hiển thị lại.',
         sample: 'Xem sách mẫu', needEmail: 'Vui lòng nhập email.', needConsent: 'Vui lòng đánh dấu để đồng ý.', failed: 'Chưa gửi được. Vui lòng email cho chúng tôi:' },
 };
 const LANGS = [['en', 'English'], ['ja', '日本語'], ['vi', 'Tiếng Việt'], ['teo', 'Teochew / Tiều'], ['other', 'Other']];
 const EMAIL = 'dvu@linadaichiagency.com';
+const WHO = ['me', 'mother', 'father', 'grandmother', 'grandfather', 'other'];
 const params = new URLSearchParams(location.search);
 const src = (params.get('s') || '').slice(0, 40);
 const nav = (navigator.language || 'en').slice(0, 2);
@@ -78,7 +86,7 @@ function render(keep = {}) {
       <label>${t.name}<input type="text" name="name" autocomplete="name" maxlength="80"></label>
       <label>${t.email}<input type="email" name="email" autocomplete="email" maxlength="120" required></label>
       <label>${t.phone} <small>${t.opt}</small><input type="tel" name="phone" autocomplete="tel" maxlength="40"></label>
-      <label>${t.who}<select name="who"><option value=""></option>${t.whoOpts.map(o => `<option>${esc(o)}</option>`).join('')}</select></label>
+      <label>${t.who}<select name="who">${t.whoOpts.map((o, i) => `<option value="${WHO[i]}">${esc(o)}</option>`).join('')}</select></label>
       <fieldset><legend>${t.langs}</legend>${LANGS.map(([v, n]) => `<label><input type="checkbox" name="langs" value="${v}">${n}</label>`).join('')}</fieldset>
       <label>${t.country}<input type="text" name="country" autocomplete="country-name" maxlength="60"></label>
       <fieldset><legend>${t.buy}</legend>${t.buyOpts.map(([v, n]) => `<label><input type="radio" name="buy" value="${v}">${esc(n)}</label>`).join('')}</fieldset>
@@ -117,7 +125,9 @@ async function send(f) {
   try {
     const r = await fetch('/api/join', { method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ ...d, langs: d.langs.join(', '), lang, src }) });
-    if (!r.ok) throw new Error((await r.json().catch(() => ({}))).error || r.status);
+    const out = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(out.error || r.status);
+    if (out.link) return ready(out.link);
     app.innerHTML = `<h1>${t.thanks}</h1><p class="lead">${t.thanksText}</p>
       <p><a class="primary" style="display:block;text-align:center;padding:18px;border-radius:22px;color:#fff;text-decoration:none" href="/book.html?sample=${lang}">📖 ${t.sample}</a></p>`;
   } catch {
@@ -125,6 +135,18 @@ async function send(f) {
     show(`${t.failed} <a href="mailto:${EMAIL}?subject=HistoryMemo%20free%20trial&body=${body}">${EMAIL}</a>`);
     btn.disabled = false; btn.textContent = t.send;
   }
+}
+function ready(link) {
+  const t = T[lang];
+  let qr = '';
+  if (window.qrcode) { const q = window.qrcode(0, 'M'); q.addData(link); q.make(); qr = q.createSvgTag({ cellSize: 5, margin: 2, scalable: true }); }
+  app.innerHTML = `<h1>${t.ready}</h1><p class="lead">${t.readyText}</p>
+    <a class="primary" href="${esc(link)}" style="display:block;text-align:center;padding:18px;border-radius:22px;color:#fff;text-decoration:none">${t.open}</a>
+    ${qr ? `<div class="card" style="text-align:center"><div style="width:200px;margin:0 auto">${qr}</div></div>` : ''}
+    <button class="secondary" id="copy" type="button">${t.copy}</button>
+    <p class="card small" style="margin:0">🔒 ${t.keep}</p>
+    <p class="small" style="word-break:break-all">${esc(link)}</p>`;
+  document.getElementById('copy').onclick = async e => { try { await navigator.clipboard.writeText(link); e.target.textContent = t.copied; } catch {} };
 }
 render();
 </script>

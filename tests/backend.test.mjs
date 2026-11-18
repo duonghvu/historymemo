@@ -387,3 +387,27 @@ test('flyer sign-ups: join form rows go to one sheet; formulas are neutralised; 
   assert.equal(rows[1][9], 'flyer');
 });
 
+test('join → Mini trial: instant private link, 12 questions, then done; one per email; no link re-sent', () => {
+  const out = call('joinInterest', { email: 'Mini@Example.org', consent: true, name: 'Lan', who: 'mother', lang: 'vi', langs: 'vi, en' });
+  assert.match(out.link, /\/\?k=[0-9a-f]{40}$/);
+  const key = out.link.split('k=')[1];
+  const me = call('me', { key });
+  assert.equal(me.profile.uiLang, 'vi');
+  assert.deepEqual(me.profile.langs, ['vi', 'en']);
+  assert.equal(me.next.lifeTotal, 12);
+  assert.equal(me.next.text.vi.startsWith('Mẹ'), true, me.next.text.vi);        // "{X}" = Mẹ
+  const st = g.ctx.findByKey_(key);
+  assert.equal(st.trial, 'mini');
+  const seen = [];
+  for (let i = 0; i < 12; i++) {
+    const p = g.ctx.currentPrompt_(g.ctx.getSt_(st.id), g.ctx.readPlan_(st));
+    seen.push(p.id);
+    call('skip', { key, qid: p.id });
+  }
+  assert.deepEqual(seen, ['0', '8', '7', '2', '24', '28', '35', '42', '44', '53', '54', '55']);
+  assert.equal(call('me', { key }).next.trialDone, 'mini');
+  const again = call('joinInterest', { email: 'mini@example.org', consent: true });
+  assert.equal(again.link, undefined);                                          // never hand out someone's link
+  assert.equal(again.reason, 'already has a trial');
+});
+
